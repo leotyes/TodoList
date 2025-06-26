@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="25dp"
+    android:layout_marginHorizontal="10dp"
     android:layout_marginTop="25dp"
     android:layout_marginBottom="5dp"
     app:cardCornerRadius="15dp"
@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="25dp">
+        android:padding="18dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -87,9 +87,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
+            android:background="@drawable/round_corner"
             android:backgroundTint="#E63946"
             android:visibility="gone"
-            android:background="@drawable/round_corner"
             app:srcCompat="@drawable/baseline_delete_24" />
 
     </LinearLayout>

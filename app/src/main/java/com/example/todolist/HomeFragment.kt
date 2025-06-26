@@ -1,11 +1,18 @@
 package com.example.todolist
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,22 +45,13 @@ class HomeFragment : Fragment() {
     ): View? {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         binding.viewModel = viewModel
-        Log.i("Debugging", viewModel.selectedGroup.toString())
         binding.lifecycleOwner = viewLifecycleOwner
         binding.rvGroups.layoutManager = LinearLayoutManager(requireContext().applicationContext)
         todoListRecyclerViewAdapter = TodoListRecyclerViewAdapter(viewModel,
             {
-                selectedGroup: GroupInfo, visibility: Int -> viewModel.groupClicked(selectedGroup, visibility)
-                Log.i("Debugging", visibility.toString())
-                binding.fabAdd.visibility = visibility
-                //binding.view.elevation = viewModel.dpToPx(requireContext(), 10f)
-                //binding.rvGroups.elevation = viewModel.dpToPx(requireContext(), 9f)
-            },
-            {
-                selectedGroup: GroupInfo -> viewModel.editClicked()
+                selectedGroup: GroupInfo -> viewModel.editClicked(selectedGroup.id)
                 binding.view.visibility = View.VISIBLE
                 binding.cvEditName.visibility = View.VISIBLE
-                Log.i("Debugging", "edit")
             },
             {
                 selectedGroup: GroupInfo -> viewModel.deleteGroup(selectedGroup)
@@ -61,18 +59,26 @@ class HomeFragment : Fragment() {
             },
             {
                 selectedGroup: GroupInfo -> viewModel.addItem(selectedGroup)
-                Log.i("Debugging", selectedGroup.toString())
-                val action = HomeFragmentDirections.actionHomeFragmentToAddItemFragment(viewModel.selectedGroup!!.id)
+//                Log.i("Debugging", selectedGroup.toString())
+                val action = HomeFragmentDirections.actionHomeFragmentToAddItemFragment(selectedGroup.id)
                 findNavController().navigate(action)
             },
             {
                 item, checked -> viewModel.itemChecked(item, checked)
             },
         )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel("notification_channel", "NotifChannel", importance).apply {
+                description = "Notifications Channel"
+            }
+            val notificationManager: NotificationManager = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
         binding.rvGroups.adapter = todoListRecyclerViewAdapter
         binding.rvGroups.scrollToPosition(0)
         binding.btnDoneName.setOnClickListener {
-            viewModel.doneNameClicked()
+            Toast.makeText(requireContext(), viewModel.doneNameClicked(), Toast.LENGTH_LONG).show()
             binding.cvEditName.visibility = View.GONE
             binding.view.visibility = View.GONE
         }
@@ -84,7 +90,11 @@ class HomeFragment : Fragment() {
             viewModel.addGroup()
             findNavController().navigate(R.id.action_homeFragment_to_addGroupFragment)
         }
-        // Inflate the layout for this fragment
+//        var builder = NotificationCompat.Builder(this, CHANNEL_ID)
+//            .setSmallIcon(R.drawable.notification_icon)
+//            .setContentTitle(textTitle)
+//            .setContentText(textContent)
+//            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         return binding.root
     }
 }

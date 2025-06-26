@@ -15,8 +15,9 @@ import com.example.todolist.databinding.TodoListItemBinding
 import com.example.todolist.db.GroupInfo
 import com.example.todolist.db.ItemInfo
 
-class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, private val clickListener: (GroupInfo, Int) -> Unit, private val editListener: (GroupInfo) -> Unit, private val deleteListener: (GroupInfo) -> Unit, private val addListener: (GroupInfo) -> Unit, private val itemCheckedListener: (ItemInfo, Boolean) -> Unit,): RecyclerView.Adapter<TodoViewHolder>() {
+class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, private val editListener: (GroupInfo) -> Unit, private val deleteListener: (GroupInfo) -> Unit, private val addListener: (GroupInfo) -> Unit, private val itemCheckedListener: (ItemInfo, Boolean) -> Unit,): RecyclerView.Adapter<TodoViewHolder>() {
     private val groupsAdapter = ArrayList<GroupInfo>()
+    private var expandedGroups = HashSet<Long>()
     private lateinit var parentContext: Context
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoViewHolder {
@@ -30,11 +31,26 @@ class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, 
         return groupsAdapter.size
     }
 
+    fun expand(groupId: Long) {
+        val position = groupsAdapter.indexOfFirst { it.id == groupId }
+        Log.i("Debug", "${groupsAdapter[position]}")
+        if (expandedGroups.contains(groupId)) {
+            expandedGroups.remove(groupId)
+        } else {
+            expandedGroups.add(groupId)
+        }
+        notifyItemChanged(position)
+    }
+
+    fun isExpanded(groupId: Long): Boolean {
+        return expandedGroups.contains(groupId)
+    }
+
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
         holder.binding.rvItems.layoutManager = LinearLayoutManager(holder.itemView.context)
-        holder.bind(groupsAdapter[position], clickListener, editListener, deleteListener, addListener, itemCheckedListener)
-        //holder.binding.root.elevation = viewModel.dpToPx(parentContext, 9f)
-        //holder.binding.root.cardElevation = viewModel.dpToPx(parentContext, 9f)
+        holder.bind(groupsAdapter[position], editListener, deleteListener, addListener, itemCheckedListener,
+            { groupId -> expand(groupId) },
+            { groupId -> isExpanded(groupId) })
     }
 
     fun setList(list: List<GroupInfo>) {
@@ -45,35 +61,30 @@ class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, 
 }
 
 class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragmentViewModel): RecyclerView.ViewHolder(binding.root) {
-    fun bind(item: GroupInfo, clickListener: (GroupInfo, Int) -> Unit, editListener: (GroupInfo) -> Unit, deleteListener: (GroupInfo) -> Unit, addListener: (GroupInfo) -> Unit, itemCheckedListener: (ItemInfo, Boolean) -> Unit) {
+    fun bind(item: GroupInfo, editListener: (GroupInfo) -> Unit, deleteListener: (GroupInfo) -> Unit, addListener: (GroupInfo) -> Unit, itemCheckedListener: (ItemInfo, Boolean) -> Unit, expandClickedListener: (groupId: Long) -> Unit, expandCheck: (groupId: Long) -> Boolean) {
         val innerAdapter = GroupItemRecyclerViewAdapter(viewModel, itemCheckedListener)
         binding.tvTitle.text = item.title
         binding.btnArrow.setOnClickListener {
-            if (/*viewModel.selectedGroup == item ||*/ viewModel.selectedGroup == null) {
-                clickListener(item, binding.btnAdd.visibility)
-                if (binding.btnAdd.visibility == View.GONE) {
-                    Log.i("Debugging", viewModel.selectedGroup.toString())
-                    //binding.root.elevation = viewModel.dpToPx(itemView.context, 11f)
-                    //binding.root.cardElevation = viewModel.dpToPx(itemView.context, 11f)
-                    binding.btnAdd.visibility = View.VISIBLE
-                    binding.btnEditName.visibility = View.VISIBLE
-                    binding.btnDeleteGroup.visibility = View.VISIBLE
-                    innerAdapter.expand(true)
-                    innerAdapter.notifyDataSetChanged()
-                    binding.btnArrow.setImageResource(R.drawable.baseline_keyboard_arrow_up_24)
-                }
-            } else if (binding.btnAdd.visibility == View.VISIBLE) {
-                clickListener(item, binding.btnAdd.visibility)
-                binding.btnAdd.visibility = View.GONE
-                binding.btnEditName.visibility = View.GONE
-                binding.btnDeleteGroup.visibility = View.GONE
-                innerAdapter.expand(false)
-                innerAdapter.notifyDataSetChanged()
-                binding.btnArrow.setImageResource(R.drawable.baseline_keyboard_arrow_down_24)
-                //viewModel.selectedGroup = null
-            }
+            expandClickedListener(item.id)
+        }
+        val expanded = expandCheck(item.id)
+        if (!expanded) {
+            binding.btnAdd.visibility = View.GONE
+            binding.btnEditName.visibility = View.GONE
+            binding.btnDeleteGroup.visibility = View.GONE
+            binding.btnArrow.setImageResource(R.drawable.baseline_keyboard_arrow_down_24)
+            innerAdapter.expand(false)
+            innerAdapter.notifyDataSetChanged()
+        } else {
+            binding.btnAdd.visibility = View.VISIBLE
+            binding.btnEditName.visibility = View.VISIBLE
+            binding.btnDeleteGroup.visibility = View.VISIBLE
+            binding.btnArrow.setImageResource(R.drawable.baseline_keyboard_arrow_up_24)
+            innerAdapter.expand(true)
+            innerAdapter.notifyDataSetChanged()
         }
         binding.btnDeleteGroup.setOnClickListener {
+//            we must delete all the items in it TODO
             deleteListener(item)
             binding.btnAdd.visibility = View.GONE
             binding.btnEditName.visibility = View.GONE
@@ -85,12 +96,6 @@ class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragme
         }
         binding.btnAdd.setOnClickListener {
             addListener(item)
-        }
-        if (viewModel.selectedGroup == item) {
-            binding.btnAdd.visibility = View.VISIBLE
-            binding.btnEditName.visibility = View.VISIBLE
-            binding.btnDeleteGroup.visibility = View.VISIBLE
-            binding.btnArrow.setImageResource(R.drawable.baseline_keyboard_arrow_up_24)
         }
         binding.rvItems.adapter = innerAdapter
         viewModel.getGrouped(item.id).observeForever {

@@ -1,21 +1,31 @@
 package com.example.todolist
 
+import android.app.Application
 import android.icu.util.Calendar
 import android.util.Log
 import android.view.View
 import androidx.core.text.isDigitsOnly
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.todolist.db.GroupInfo
 import com.example.todolist.db.ItemDao
 import com.example.todolist.db.ItemInfo
+import com.example.todolist.db.TodoDao
+import com.example.todolist.workers.SingleNotificationWorker
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
-class AddItemFragmentViewModel : ViewModel() {
+class AddItemFragmentViewModel(private val application: Application, private val itemDao: ItemDao, private val todoDao: TodoDao) : AndroidViewModel(application) {
+//    TODO implement factory for todoDao and itemDao
     val textName = MutableLiveData<String>()
     val textDescription = MutableLiveData<String>()
     val textDueTime = MutableLiveData<String>()
@@ -42,14 +52,16 @@ class AddItemFragmentViewModel : ViewModel() {
     val minEndTime = MutableLiveData<Int>()
     val checkedRange = MutableLiveData<Boolean>()
     val clickableTimes = MutableLiveData<Boolean>()
-    val parentGroup = MutableLiveData<Int>()
+    val parentGroup = MutableLiveData<Long>()
     val calStartDate = Calendar.getInstance()
     val calDate = Calendar.getInstance()
     val calEndDate = Calendar.getInstance()
     val calDue = Calendar.getInstance()
+    private lateinit var workManager: WorkManager
     lateinit var items: LiveData<List<ItemInfo>>
 
     init {
+        workManager = WorkManager.getInstance(application)
         minDateInMillisStart.value = calStartDate.timeInMillis
         calEndDate.add(Calendar.DAY_OF_YEAR, 1)
         minDateInMillisEnd.value = calEndDate.timeInMillis
@@ -70,6 +82,10 @@ class AddItemFragmentViewModel : ViewModel() {
         checkedItemDate.value = false
         checkedItemStart.value = false
         checkedItemEnd.value = false
+    }
+
+    fun getGroupName(groupId: Long) {
+
     }
 
     fun calcMinEndDate() {
@@ -208,9 +224,9 @@ class AddItemFragmentViewModel : ViewModel() {
                 if (textRemind.value!!.isBlank() || textRemind.value == "") return "Reminder Time Cannot Be Blank"
                 if (!textRemind.value!!.isDigitsOnly()) return "Reminder Time Is Not a Number"
             }
-            return ""
+            return "Item added successfully"
         } else {
-            return "Name Is Empty"
+            return "Name is empty"
         }
     }
 
@@ -222,9 +238,9 @@ class AddItemFragmentViewModel : ViewModel() {
         if (min(v1, v2) == 0) return View.GONE else return View.VISIBLE
     }
 
-    fun addItem(itemDao: ItemDao) : String {
+    fun addItem() : String {
         val result = checkAdd()
-        if (result == "") {
+        if (result == "Item added successfully") {
             var repeatType: Int?
             if (checkedDaily.value == true) {
                 repeatType = 1
@@ -238,39 +254,80 @@ class AddItemFragmentViewModel : ViewModel() {
             Log.i("Debugging", checkedItemEnd.value.toString() + " Checking")
             Log.i("Debugging", (checkedItemEnd.value == true && checkedDaily.value == true || checkedWeekly.value == true || checkedMonthly.value == true || checkedItemDate.value == true).toString())
             viewModelScope.launch {
-                itemDao.insertItem(ItemInfo(
-                    0,
-                    textName.value!!,
-                    if (textDescription.value!!.isNotBlank()) textDescription.value!! else null,
-                    parentGroup.value!!,
-                    if (checkedDue.value == true) SimpleDateFormat("HH:mm").parse(textDueTime.value).time else null,
-                    if (checkedDue.value == true) SimpleDateFormat("dd/MM/yyyy").parse(textDueDate.value).time else null,
-                    if (checkedItemDate.value == true && checkedDaily.value != true && checkedWeekly.value != true && checkedMonthly.value != true) SimpleDateFormat("dd/MM/yyyy").parse(textItemDate.value).time else null,
-                    if (checkedItemStart.value == true && (checkedDaily.value == true || checkedWeekly.value == true || checkedMonthly.value == true || checkedItemDate.value == true)) SimpleDateFormat("HH:mm").parse(textItemStart.value).time else null,
-                    if (checkedItemEnd.value == true && (checkedDaily.value == true || checkedWeekly.value == true || checkedMonthly.value == true || checkedItemDate.value == true)) SimpleDateFormat("HH:mm").parse(textItemEnd.value).time else null,
-                    if (checkedRangeStart.value == true && (checkedDaily.value == true || checkedWeekly.value == true || checkedMonthly.value == true)) SimpleDateFormat("dd/MM/yyyy").parse(textDateStart.value).time else null,
-                    if (checkedRangeEnd.value == true && (checkedDaily.value == true || checkedWeekly.value == true || checkedMonthly.value == true)) SimpleDateFormat("dd/MM/yyyy").parse(textDateEnd.value).time else null,
-                    repeatType,
-                    false,
-                    if (checkedRemind.value == true) textRemind.value!!.toInt() else null
-                ))
+                val itemId = itemDao.insertItem(
+                    ItemInfo(
+                        0,
+                        textName.value!!,
+                        if (textDescription.value!!.isNotBlank()) textDescription.value!! else null,
+                        parentGroup.value!!,
+                        if (checkedDue.value == true) SimpleDateFormat("HH:mm").parse(textDueTime.value).time else null,
+                        if (checkedDue.value == true) SimpleDateFormat("dd/MM/yyyy").parse(textDueDate.value).time else null,
+                        if (checkedItemDate.value == true && checkedDaily.value != true && checkedWeekly.value != true && checkedMonthly.value != true) SimpleDateFormat("dd/MM/yyyy").parse(textItemDate.value).time else null,
+                        if (checkedItemStart.value == true && (checkedDaily.value == true || checkedWeekly.value == true || checkedMonthly.value == true || checkedItemDate.value == true)) SimpleDateFormat("HH:mm").parse(textItemStart.value).time else null,
+                        if (checkedItemEnd.value == true && (checkedDaily.value == true || checkedWeekly.value == true || checkedMonthly.value == true || checkedItemDate.value == true)) SimpleDateFormat("HH:mm").parse(textItemEnd.value).time else null,
+                        if (checkedRangeStart.value == true && (checkedDaily.value == true || checkedWeekly.value == true || checkedMonthly.value == true)) SimpleDateFormat("dd/MM/yyyy").parse(textDateStart.value).time else null,
+                        if (checkedRangeEnd.value == true && (checkedDaily.value == true || checkedWeekly.value == true || checkedMonthly.value == true)) SimpleDateFormat("dd/MM/yyyy").parse(textDateEnd.value).time else null,
+                        repeatType,
+                        false,
+                        if (checkedRemind.value == true) textRemind.value!!.toInt() else null
+                    )
+                )
+                if (checkedRemind.value == true) {
+                    val groupName = todoDao.getGroupById(parentGroup.value!!).title
+                    when (repeatType) {
+                        null -> {
+//                            january 1, 1970 00:00:00 GMT+00:00 TODO fix this problem
+                            Log.i("Debug", "${SimpleDateFormat("dd/MM/yyyy").parse(textItemDate.value).time + SimpleDateFormat("HH:mm").parse(textItemStart.value).time - (textRemind.value!!.toInt() * 60000)}")
+                            if (checkedItemDate.value == true) {
+                                if (checkedItemStart.value == true) {
+                                    val request =
+                                        OneTimeWorkRequestBuilder<SingleNotificationWorker>()
+                                            .setInputData(
+                                                workDataOf(
+                                                    SingleNotificationWorker.TODO_NAME to textName.value,
+                                                    SingleNotificationWorker.GROUP_NAME to groupName,
+                                                    SingleNotificationWorker.TODO_TIME to textItemStart.value,
+                                                    SingleNotificationWorker.TODO_REMIND to textRemind.value,
+                                                    SingleNotificationWorker.TODO_DESCRIPTION to textDescription.value,
+                                                    SingleNotificationWorker.TODO_ID to itemId
+                                                )
+                                            )
+                                            .setInitialDelay(
+                                                SimpleDateFormat("dd/MM/yyyy").parse(textItemDate.value).time + SimpleDateFormat("HH:mm").parse(textItemStart.value).time - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis(),
+                                                TimeUnit.MILLISECONDS
+                                            )
+                                            .build()
+                                    workManager.enqueueUniqueWork(
+                                        itemId.toString(),
+                                        ExistingWorkPolicy.REPLACE,
+                                        request
+                                    )
+                                }
+                            }
+                        }
+
+                        1 -> {
+
+                        }
+                    }
+                }
+                textName.value = ""
+                textDescription.value = ""
+                checkedDue.value = false
+                checkedItemDate.value = false
+                checkedItemStart.value = false
+                checkedItemEnd.value = false
+                textDueTime.value = SimpleDateFormat("HH:mm").format(minDateInMillisDue.value)
+                textDueDate.value = SimpleDateFormat("dd/MM/yyyy").format(minDateInMillisDue.value)
+                textItemDate.value = SimpleDateFormat("dd/MM/yyyy").format(minDateInMillisStart.value)
+                textDateStart.value = SimpleDateFormat("dd/MM/yyyy").format(minDateInMillisStart.value)
+                textDateEnd.value = SimpleDateFormat("dd/MM/yyyy").format(minDateInMillisEnd.value)
+                textItemStart.value = "00:00"
+                textItemEnd.value = "00:00"
+                // calEndDate //reset this one TODO
+                // calEndDate.add(Calendar.DAY_OF_YEAR, 1)
             }
-            textName.value = ""
-            textDescription.value = ""
-            checkedDue.value = false
-            checkedItemDate.value = false
-            checkedItemStart.value = false
-            checkedItemEnd.value = false
-            textDueTime.value = SimpleDateFormat("HH:mm").format(minDateInMillisDue.value)
-            textDueDate.value = SimpleDateFormat("dd/MM/yyyy").format(minDateInMillisDue.value)
-            textItemDate.value = SimpleDateFormat("dd/MM/yyyy").format(minDateInMillisStart.value)
-            textDateStart.value = SimpleDateFormat("dd/MM/yyyy").format(minDateInMillisStart.value)
-            textDateEnd.value = SimpleDateFormat("dd/MM/yyyy").format(minDateInMillisEnd.value)
-            textItemStart.value = "00:00"
-            textItemEnd.value = "00:00"
-            // calEndDate //reset this one
-            // calEndDate.add(Calendar.DAY_OF_YEAR, 1)
-            return ""
+            return "Item added successfully"
         } else {
             return result
         }

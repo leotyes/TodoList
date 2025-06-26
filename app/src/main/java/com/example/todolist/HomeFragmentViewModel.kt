@@ -18,8 +18,7 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     val groups = todoDao.getItems()
     val items = itemDao.getItems()
     val textNewGroupName = MutableLiveData<String>()
-    var selectedGroup: GroupInfo? = null
-    var selectedItem: ItemInfo? = null
+    val editingGroup = MutableLiveData<Long>()
     val inspectTitle = MutableLiveData<String>()
     val inspectDescription = MutableLiveData<String>()
     val inspectDue = MutableLiveData<String>()
@@ -30,17 +29,6 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
         textNewGroupName.value = ""
     }
 
-    fun groupClicked(selected: GroupInfo, visibility: Int) {
-        Log.i("Debugging", visibility.toString())
-        if (selectedGroup == null) {
-            Log.i("Debugging", "ViewModel got it")
-            selectedGroup = selected
-        } else if (visibility == 0) {
-            Log.i("Debugging", "back to null")
-            selectedGroup = null
-        }
-    }
-
     fun addGroup() {
 
     }
@@ -49,22 +37,24 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
 
     }
 
-    fun editClicked() {
-
+    fun editClicked(groupId: Long) {
+        editingGroup.value = groupId
     }
 
-    fun doneNameClicked() {
-        /* TODO Make toast if blank */
+    fun doneNameClicked(): String {
         if (textNewGroupName.value!!.isNotBlank()) {
             viewModelScope.launch {
                 todoDao.editItem(
                     GroupInfo(
-                        selectedGroup!!.id,
+                        editingGroup.value!!,
                         textNewGroupName.value!!,
                     )
                 )
             }
             textNewGroupName.value = ""
+            return "Group name updated"
+        } else {
+            return "Group name cannot be blank"
         }
     }
 
@@ -96,7 +86,6 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     }
 
     fun deleteGroup(item: GroupInfo) {
-        selectedGroup = null
         viewModelScope.launch {
             todoDao.deleteItem(item)
         }
@@ -107,7 +96,7 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
             TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics)
     }
 
-    fun getGrouped(parentId: Int): LiveData<List<ItemInfo>> {
+    fun getGrouped(parentId: Long): LiveData<List<ItemInfo>> {
         return itemDao.getGroupedItems(parentId)
     }
 }

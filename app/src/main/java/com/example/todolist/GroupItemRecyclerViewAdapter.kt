@@ -36,7 +36,7 @@ class GroupItemRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel,
     }
 
     fun setList(list: List<ItemInfo>) {
-        Log.i("Debug", list.toString())
+//        Log.i("Debug", list.toString())
         itemsAdapter.clear()
         itemsAdapter.addAll(list)
     }
@@ -83,26 +83,24 @@ class ItemViewHolder(val binding: GroupListItemBinding, val viewModel: HomeFragm
         }
         if (expanded == true) {
             binding.tvDescription.visibility = View.VISIBLE
-            binding.btnEdit.visibility = View.VISIBLE
-            binding.btnDelete.visibility = View.VISIBLE
         } else {
             binding.tvDescription.visibility = View.GONE
-            binding.btnEdit.visibility = View.GONE
-            binding.btnDelete.visibility = View.GONE
         }
         binding.cbItemName.text = item.name
         binding.tvDue.text = if (item.dueDate == null) "No due date" else "Due at " + SimpleDateFormat("HH:mm").format(item.dueTime) + " " + SimpleDateFormat("dd/MM/yyyy").format(item.dueDate)
         binding.tvDescription.text = if (item.description == null) "No description" else item.description
-        binding.cbItemName.setOnClickListener {
-            if (binding.cbItemName.isChecked) {
-                binding.cbItemName.paintFlags = binding.cbItemName.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                checkedListener(item, true)
-            } else {
-                binding.cbItemName.paintFlags = binding.cbItemName.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-                checkedListener(item, false)
-            }
+        binding.cbItemName.isChecked = item.checked
+        if (item.checked) {
+            binding.cbItemName.paintFlags = binding.cbItemName.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+        } else {
+            binding.cbItemName.paintFlags = binding.cbItemName.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
         }
-        binding.tvRemind.text =
-        // add remind change
+        binding.cbItemName.setOnCheckedChangeListener(null)
+        binding.cbItemName.setOnCheckedChangeListener { _, checked ->
+            Log.i("Debug", "${binding.cbItemName.isChecked} just say something bro anything")
+            checkedListener(item, checked)
+        }
+        binding.tvRemind.text = if (item.remind != null) "Remind ${item.remind.toString()} Minutes Before" else null
+        // add remind functionality
     }
 }

@@ -12,7 +12,7 @@ import com.example.todolist.db.ItemInfo
 @Dao
 interface ItemDao {
     @Insert
-    suspend fun insertItem(item: ItemInfo)
+    suspend fun insertItem(item: ItemInfo): Long
 
     @Update
     suspend fun editItem(item: ItemInfo)
@@ -24,5 +24,5 @@ interface ItemDao {
     fun getItems(): LiveData<List<ItemInfo>>
 
     @Query("SELECT * FROM item_data_table WHERE todo_group = :parentGroup")
-    fun getGroupedItems(parentGroup: Int): LiveData<List<ItemInfo>>
+    fun getGroupedItems(parentGroup: Long): LiveData<List<ItemInfo>>
 }

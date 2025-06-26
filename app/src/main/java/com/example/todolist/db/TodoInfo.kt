@@ -10,13 +10,13 @@ import java.util.Date
 data class ItemInfo(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "todo_id")
-    var id: Int,
+    var id: Long,
     @ColumnInfo(name = "todo_title")
     var name: String,
     @ColumnInfo(name = "todo_description")
     var description: String?,
     @ColumnInfo(name = "todo_group")
-    var group: Int,
+    var group: Long,
     @ColumnInfo(name = "todo_due_time")
     var dueTime: Long?,
     @ColumnInfo(name = "todo_due_date")
@@ -43,7 +43,7 @@ data class ItemInfo(
 data class GroupInfo(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "group_id")
-    var id: Int,
+    var id: Long,
     @ColumnInfo(name = "group_title")
     var title: String
 )

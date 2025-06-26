@@ -27,6 +27,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            isDebuggable = true
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -47,8 +50,11 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     val lifecycle_version = "2.7.0"
     val room_version = "2.6.1"
+    val work_version = "2.9.0"
 
     implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.work:work-runtime:$work_version")
+    implementation("androidx.work:work-runtime-ktx:$work_version")
     //annotationProcessor("androidx.room:room-compiler:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-ktx:$room_version")

@@ -16,19 +16,23 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.todolist.databinding.FragmentAddItemBinding
 import com.example.todolist.db.ItemDao
+import com.example.todolist.db.TodoDao
 import com.example.todolist.db.TodoDatabase
 import java.text.SimpleDateFormat
 import kotlin.math.min
 
 class AddItemFragment : Fragment() {
     private lateinit var binding: FragmentAddItemBinding
-    private lateinit var dao: ItemDao
+    private lateinit var itemDao: ItemDao
+    private lateinit var todoDao: TodoDao
     private lateinit var viewModel: AddItemFragmentViewModel
     private val args: AddItemFragmentArgs by navArgs()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        dao = TodoDatabase.getInstance(requireContext().applicationContext).itemDao
-        viewModel = ViewModelProvider(this).get(AddItemFragmentViewModel()::class.java)
+        itemDao = TodoDatabase.getInstance(requireContext().applicationContext).itemDao
+        todoDao = TodoDatabase.getInstance(requireContext().applicationContext).todoDao
+        val factory = AddItemViewModelFactory(requireActivity().application, itemDao, todoDao)
+        viewModel = ViewModelProvider(this, factory).get(AddItemFragmentViewModel(requireActivity().application, itemDao, todoDao)::class.java)
     }
 
     override fun onCreateView(
@@ -81,29 +85,26 @@ class AddItemFragment : Fragment() {
             datePickerDialog.datePicker.minDate = viewModel.minDateInMillisStart.value!!
             datePickerDialog.show()
         }
+        val startTimeSetListener = TimePickerDialog.OnTimeSetListener { timePicker, hour, minute ->
+            viewModel.calDate.set(Calendar.HOUR_OF_DAY, hour)
+            viewModel.calDate.set(Calendar.MINUTE, minute)
+            viewModel.textItemStart.value = SimpleDateFormat("HH:mm").format(viewModel.calDate.time)
+            viewModel.calcMinEndTime(hour, minute, 0)
+        }
+        val endTimeSetListener = TimePickerDialog.OnTimeSetListener { timePicker, hour, minute ->
+            viewModel.calStartDate.set(Calendar.HOUR_OF_DAY, hour)
+            viewModel.calStartDate.set(Calendar.MINUTE, minute)
+            viewModel.textItemEnd.value = SimpleDateFormat("HH:mm").format(viewModel.calStartDate.time)
+            viewModel.calcMinEndTime(hour, minute, 1)
+        }
         binding.btnItemStart.setOnClickListener {
-            val timeSetListener = TimePickerDialog.OnTimeSetListener { timePicker, hour, minute ->
-                viewModel.calDate.set(Calendar.HOUR_OF_DAY, hour)
-                viewModel.calDate.set(Calendar.MINUTE, minute)
-                viewModel.textItemStart.value = SimpleDateFormat("HH:mm").format(viewModel.calDate.time)
-                viewModel.calcMinEndTime(hour, minute, 0)
-            }
-            TimePickerDialog(requireContext(), timeSetListener, viewModel.calDate.get(Calendar.HOUR_OF_DAY), viewModel.calDate.get(Calendar.MINUTE), true).show()
+            TimePickerDialog(requireContext(), android.R.style.Theme_Material_Dialog, startTimeSetListener, viewModel.calDate.get(Calendar.HOUR_OF_DAY), viewModel.calDate.get(Calendar.MINUTE), true).show()
         }
         binding.btnItemEnd.setOnClickListener {
-            val timeSetListener = TimePickerDialog.OnTimeSetListener { timePicker, hour, minute ->
-                viewModel.calStartDate.set(Calendar.HOUR_OF_DAY, hour)
-                viewModel.calStartDate.set(Calendar.MINUTE, minute)
-                viewModel.textItemEnd.value = SimpleDateFormat("HH:mm").format(viewModel.calStartDate.time)
-                viewModel.calcMinEndTime(hour, minute, 1)
-            }
-            TimePickerDialog(requireContext(), timeSetListener, viewModel.calStartDate.get(Calendar.HOUR_OF_DAY), viewModel.calStartDate.get(Calendar.MINUTE), true).show()
+            TimePickerDialog(requireContext(), android.R.style.Theme_Material_Dialog, endTimeSetListener, viewModel.calStartDate.get(Calendar.HOUR_OF_DAY), viewModel.calStartDate.get(Calendar.MINUTE), true).show()
         }
         binding.cbDate.setOnClickListener {
             if (viewModel.checkedItemDate.value == false) {
-//                Log.i("Debugging", "${viewModel.checkedItemStart.value!!}")
-//                Log.i("Debugging", "${binding.cbStartTime.isChecked}")
-
                 binding.llStartTime.visibility = View.GONE
                 binding.llEndTime.visibility = View.GONE
                 binding.llRemind.visibility = viewModel.remindVisibility(binding.llStartTime.visibility)
@@ -114,12 +115,11 @@ class AddItemFragment : Fragment() {
             }
         }
         binding.btnItemDone.setOnClickListener {
-            val result = viewModel.addItem(dao)
-            if (result == "") {
+            val result = viewModel.addItem()
+            if (result == "Item added successfully") {
                 findNavController().navigate(R.id.action_addItemFragment_to_homeFragment)
-            } else {
-                Toast.makeText(requireContext(), result, Toast.LENGTH_LONG).show()
             }
+            Toast.makeText(requireContext(), result, Toast.LENGTH_LONG).show()
         }
         binding.cbDaily.setOnClickListener {
             if (viewModel.checkedDaily.value == true) {
@@ -207,17 +207,24 @@ class AddItemFragment : Fragment() {
                 binding.llRemind.visibility = viewModel.remindVisibility(binding.llStartTime.visibility)
             }
         }
+        val dateStartSetListener = DatePickerDialog.OnDateSetListener { datePicker, year, month, day ->
+            viewModel.calStartDate.set(Calendar.DAY_OF_MONTH, day)
+            viewModel.calStartDate.set(Calendar.MONTH, month)
+            viewModel.calStartDate.set(Calendar.YEAR, year)
+            viewModel.textDateStart.value = SimpleDateFormat("dd/MM/yyyy").format(viewModel.calStartDate.time)
+            viewModel.calcMinEndDate()
+        }
+        val dateEndSetListener = DatePickerDialog.OnDateSetListener { datePicker, year, month, day ->
+            viewModel.calEndDate.set(Calendar.DAY_OF_MONTH, day)
+            viewModel.calEndDate.set(Calendar.MONTH, month)
+            viewModel.calEndDate.set(Calendar.YEAR, year)
+            viewModel.textDateEnd.value = SimpleDateFormat("dd/MM/yyyy").format(viewModel.calEndDate.time)
+            viewModel.roundEndDate(year, month, day)
+        }
         binding.btnStartDate.setOnClickListener {
-            val dateSetListener = DatePickerDialog.OnDateSetListener { datePicker, year, month, day ->
-                viewModel.calStartDate.set(Calendar.DAY_OF_MONTH, day)
-                viewModel.calStartDate.set(Calendar.MONTH, month)
-                viewModel.calStartDate.set(Calendar.YEAR, year)
-                viewModel.textDateStart.value = SimpleDateFormat("dd/MM/yyyy").format(viewModel.calStartDate.time)
-                viewModel.calcMinEndDate()
-            }
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
-                dateSetListener,
+                dateStartSetListener,
                 2025,
                 0,
                 1
@@ -226,16 +233,9 @@ class AddItemFragment : Fragment() {
             datePickerDialog.show()
         }
         binding.btnEndDate.setOnClickListener {
-            val dateSetListener = DatePickerDialog.OnDateSetListener { datePicker, year, month, day ->
-                viewModel.calEndDate.set(Calendar.DAY_OF_MONTH, day)
-                viewModel.calEndDate.set(Calendar.MONTH, month)
-                viewModel.calEndDate.set(Calendar.YEAR, year)
-                viewModel.textDateEnd.value = SimpleDateFormat("dd/MM/yyyy").format(viewModel.calEndDate.time)
-                viewModel.roundEndDate(year, month, day)
-            }
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
-                dateSetListener,
+                dateEndSetListener,
                 2025,
                 0,
                 1
