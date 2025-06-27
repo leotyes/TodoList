@@ -87,6 +87,7 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
 
     fun deleteGroup(item: GroupInfo) {
         viewModelScope.launch {
+            itemDao.deleteGroupedItems(item.id)
             todoDao.deleteItem(item)
         }
     }

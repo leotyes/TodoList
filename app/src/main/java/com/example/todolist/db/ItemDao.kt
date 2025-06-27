@@ -25,4 +25,7 @@ interface ItemDao {
 
     @Query("SELECT * FROM item_data_table WHERE todo_group = :parentGroup")
     fun getGroupedItems(parentGroup: Long): LiveData<List<ItemInfo>>
+
+    @Query("DELETE FROM item_data_table WHERE todo_group = :parentGroup")
+    suspend fun deleteGroupedItems(parentGroup: Long)
 }

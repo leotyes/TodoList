@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
 class AddItemFragmentViewModel(private val application: Application, private val itemDao: ItemDao, private val todoDao: TodoDao) : AndroidViewModel(application) {
-//    TODO implement factory for todoDao and itemDao
     val textName = MutableLiveData<String>()
     val textDescription = MutableLiveData<String>()
     val textDueTime = MutableLiveData<String>()
@@ -277,7 +276,12 @@ class AddItemFragmentViewModel(private val application: Application, private val
                     when (repeatType) {
                         null -> {
 //                            january 1, 1970 00:00:00 GMT+00:00 TODO fix this problem
-                            Log.i("Debug", "${SimpleDateFormat("dd/MM/yyyy").parse(textItemDate.value).time + SimpleDateFormat("HH:mm").parse(textItemStart.value).time - (textRemind.value!!.toInt() * 60000)}")
+                            val calendar = Calendar.getInstance()
+                            val timeCalendar = Calendar.getInstance()
+                            calendar.time = SimpleDateFormat("dd/MM/yyyy").parse(textItemDate.value)
+                            timeCalendar.time = SimpleDateFormat("HH:mm").parse(textItemStart.value)
+                            calendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY))
+                            calendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE))
                             if (checkedItemDate.value == true) {
                                 if (checkedItemStart.value == true) {
                                     val request =
@@ -293,7 +297,7 @@ class AddItemFragmentViewModel(private val application: Application, private val
                                                 )
                                             )
                                             .setInitialDelay(
-                                                SimpleDateFormat("dd/MM/yyyy").parse(textItemDate.value).time + SimpleDateFormat("HH:mm").parse(textItemStart.value).time - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis(),
+                                                calendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis(),
                                                 TimeUnit.MILLISECONDS
                                             )
                                             .build()

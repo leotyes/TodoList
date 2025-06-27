@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.todolist.databinding.FragmentAddGroupBinding
@@ -21,7 +22,6 @@ class AddGroupFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         dao = TodoDatabase.getInstance(requireContext().applicationContext).todoDao
-        //val factory = HomeViewModelFactory(dao)
         viewModel = ViewModelProvider(this).get(AddGroupFragmentViewModel()::class.java)
     }
 
@@ -34,6 +34,9 @@ class AddGroupFragment : Fragment() {
         binding.lifecycleOwner = viewLifecycleOwner
         binding.btnDone.setOnClickListener {
             viewModel.addGroup(dao)
+        }
+        viewModel.groupResult.observe(viewLifecycleOwner) { result ->
+            Toast.makeText(requireContext(), result, Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_addGroupFragment_to_homeFragment)
         }
         return binding.root

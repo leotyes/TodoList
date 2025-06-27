@@ -84,7 +84,6 @@ class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragme
             innerAdapter.notifyDataSetChanged()
         }
         binding.btnDeleteGroup.setOnClickListener {
-//            we must delete all the items in it TODO
             deleteListener(item)
             binding.btnAdd.visibility = View.GONE
             binding.btnEditName.visibility = View.GONE

@@ -16,7 +16,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.todolist.R
-
+// TODO work on other notifs
 class DailyNotificationWorker(private val appContext: Context, private val workerParams: WorkerParameters) : Worker(appContext, workerParams) {
     override fun doWork(): Result {
         val group = workerParams.inputData.getString(TODO_ITEM)
@@ -58,13 +58,14 @@ class SingleNotificationWorker(private val appContext: Context, private val work
         val itemRemind = workerParams.inputData.getString(TODO_REMIND)
         val itemDescription = workerParams.inputData.getString(TODO_DESCRIPTION)
         val itemId = workerParams.inputData.getLong(TODO_ID, -1)
-        Log.i("Debug", "hi fellas")
         if (itemId != -1L) {
             val builder = NotificationCompat.Builder(appContext, "notification_channel")
                 .setSmallIcon(R.drawable.baseline_keyboard_arrow_up_24)
-                .setContentTitle("$itemName at $itemTime, $itemRemind minutes before")
-                .setContentText("Group: $groupName")
-                .setStyle(NotificationCompat.BigTextStyle().bigText(itemDescription))
+                .setContentTitle("$itemName at $itemTime")
+                .setContentText("$itemRemind minutes before")
+                .setStyle(NotificationCompat.BigTextStyle()
+                    .setBigContentTitle("$itemName at $itemTime in group $groupName")
+                    .bigText(itemDescription))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             with(NotificationManagerCompat.from(appContext)) {
                 if (ActivityCompat.checkSelfPermission(
@@ -75,7 +76,6 @@ class SingleNotificationWorker(private val appContext: Context, private val work
                     notify(1, builder.build())
                     return@with
                 }
-
             }
         }
 
