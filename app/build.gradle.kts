@@ -51,7 +51,7 @@ dependencies {
     val lifecycle_version = "2.7.0"
     val room_version = "2.6.1"
     val work_version = "2.9.0"
-
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.work:work-runtime:$work_version")
     implementation("androidx.work:work-runtime-ktx:$work_version")

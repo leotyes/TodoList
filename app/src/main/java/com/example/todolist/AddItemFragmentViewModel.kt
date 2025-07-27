@@ -1,28 +1,43 @@
 package com.example.todolist
 
 import android.app.Application
+import android.content.Context
 import android.icu.util.Calendar
 import android.util.Log
 import android.view.View
 import androidx.core.text.isDigitsOnly
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.example.todolist.db.GroupInfo
 import com.example.todolist.db.ItemDao
 import com.example.todolist.db.ItemInfo
 import com.example.todolist.db.TodoDao
+import com.example.todolist.workers.DailyNotificationWorker
 import com.example.todolist.workers.SingleNotificationWorker
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
+import com.example.todolist.DataStoreManager.dataStore
+import androidx.datastore.preferences.core.longPreferencesKey
+import com.example.todolist.workers.MonthlyNotificationWorker
+import com.example.todolist.workers.WeeklyNotificationWorker
+import java.time.DayOfWeek
 
 class AddItemFragmentViewModel(private val application: Application, private val itemDao: ItemDao, private val todoDao: TodoDao) : AndroidViewModel(application) {
     val textName = MutableLiveData<String>()
@@ -56,6 +71,7 @@ class AddItemFragmentViewModel(private val application: Application, private val
     val calDate = Calendar.getInstance()
     val calEndDate = Calendar.getInstance()
     val calDue = Calendar.getInstance()
+    private val dataStore = application.dataStore
     private lateinit var workManager: WorkManager
     lateinit var items: LiveData<List<ItemInfo>>
 
@@ -237,6 +253,28 @@ class AddItemFragmentViewModel(private val application: Application, private val
         if (min(v1, v2) == 0) return View.GONE else return View.VISIBLE
     }
 
+    fun intToDay(day: Int): String {
+        return when (day) {
+            Calendar.SUNDAY -> "Sunday"
+            Calendar.MONDAY -> "Monday"
+            Calendar.TUESDAY -> "Tuesday"
+            Calendar.WEDNESDAY -> "Wednesday"
+            Calendar.THURSDAY -> "Thursday"
+            Calendar.FRIDAY -> "Friday"
+            Calendar.SATURDAY -> "Saturday"
+            else -> "Error"
+        }
+    }
+
+    fun orderSuffix(num: Int): String {
+        return when (num) {
+            1 -> "1st"
+            2 -> "2nd"
+            3 -> "3rd"
+            else -> "${num}th"
+        }
+    }
+
     fun addItem() : String {
         val result = checkAdd()
         if (result == "Item added successfully") {
@@ -275,7 +313,6 @@ class AddItemFragmentViewModel(private val application: Application, private val
                     val groupName = todoDao.getGroupById(parentGroup.value!!).title
                     when (repeatType) {
                         null -> {
-//                            january 1, 1970 00:00:00 GMT+00:00 TODO fix this problem
                             val calendar = Calendar.getInstance()
                             val timeCalendar = Calendar.getInstance()
                             calendar.time = SimpleDateFormat("dd/MM/yyyy").parse(textItemDate.value)
@@ -309,9 +346,156 @@ class AddItemFragmentViewModel(private val application: Application, private val
                                 }
                             }
                         }
-
                         1 -> {
-
+                            val startCalendar = Calendar.getInstance()
+                            val endCalendar = Calendar.getInstance()
+                            val timeCalendar = Calendar.getInstance()
+                            startCalendar.time = SimpleDateFormat("dd/MM/yyyy").parse(textDateStart.value)
+                            timeCalendar.time = SimpleDateFormat("HH:mm").parse(textItemStart.value)
+                            startCalendar.set(
+                                Calendar.HOUR_OF_DAY,
+                                timeCalendar.get(Calendar.HOUR_OF_DAY)
+                            )
+                            startCalendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE))
+                            if (checkedRangeStart.value == true) {
+                                if (checkedItemStart.value == true) {
+                                    var numRepeats = -1L
+                                    if (checkedRangeEnd.value == true) {
+                                        endCalendar.time =
+                                            SimpleDateFormat("dd/MM/yyyy").parse(textDateEnd.value)
+                                        endCalendar.set(
+                                            Calendar.HOUR_OF_DAY,
+                                            timeCalendar.get(Calendar.HOUR_OF_DAY)
+                                        )
+                                        endCalendar.set(
+                                            Calendar.MINUTE,
+                                            timeCalendar.get(Calendar.MINUTE)
+                                        )
+                                        numRepeats =
+                                            (endCalendar.timeInMillis - startCalendar.timeInMillis) / 86400000 + 1
+                                        Log.i("Debug", "$numRepeats")
+                                    }
+                                    dataStore.edit {
+                                        it[longPreferencesKey(itemId.toString())] = numRepeats
+                                    }
+                                    val request =
+                                        PeriodicWorkRequestBuilder<DailyNotificationWorker>(24, TimeUnit.HOURS)
+                                            .setInputData(
+                                                workDataOf(
+                                                    DailyNotificationWorker.TODO_NAME to textName.value,
+                                                    DailyNotificationWorker.GROUP_NAME to groupName,
+                                                    DailyNotificationWorker.TODO_TIME to textItemStart.value,
+                                                    DailyNotificationWorker.TODO_REMIND to textRemind.value,
+                                                    DailyNotificationWorker.TODO_DESCRIPTION to textDescription.value,
+                                                    DailyNotificationWorker.TODO_ID to itemId
+                                                )
+                                            )
+                                            .setInitialDelay(
+                                                startCalendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis(),
+                                                TimeUnit.MILLISECONDS
+                                            )
+                                            .build()
+                                    workManager.enqueueUniquePeriodicWork(
+                                        itemId.toString(),
+                                        ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+                                        request
+                                    )
+                                }
+                            }
+                        }
+                        2 -> {
+                            val startCalendar = Calendar.getInstance()
+                            val endCalendar = Calendar.getInstance()
+                            val timeCalendar = Calendar.getInstance()
+                            startCalendar.time = SimpleDateFormat("dd/MM/yyyy").parse(textDateStart.value)
+                            timeCalendar.time = SimpleDateFormat("HH:mm").parse(textItemStart.value)
+                            startCalendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY))
+                            startCalendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE))
+                            if (checkedRangeStart.value == true) {
+                                if (checkedItemStart.value == true) {
+                                    var numRepeats = -1L
+                                    if (checkedRangeEnd.value == true) {
+                                        endCalendar.time = SimpleDateFormat("dd/MM/yyyy").parse(textDateEnd.value)
+                                        endCalendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY))
+                                        endCalendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE))
+                                        numRepeats = (endCalendar.timeInMillis - startCalendar.timeInMillis) / 86400000 + 1
+                                        Log.i("Debug", "$numRepeats")
+                                    }
+                                    dataStore.edit {
+                                        it[longPreferencesKey(itemId.toString())] = numRepeats
+                                    }
+                                    val request =
+                                        PeriodicWorkRequestBuilder<WeeklyNotificationWorker>(7, TimeUnit.DAYS)
+                                            .setInputData(
+                                                workDataOf(
+                                                    WeeklyNotificationWorker.TODO_NAME to textName.value,
+                                                    WeeklyNotificationWorker.GROUP_NAME to groupName,
+                                                    WeeklyNotificationWorker.TODO_TIME to textItemStart.value,
+                                                    WeeklyNotificationWorker.TODO_DAY to intToDay(startCalendar.get(Calendar.DAY_OF_WEEK)),
+                                                    WeeklyNotificationWorker.TODO_REMIND to textRemind.value,
+                                                    WeeklyNotificationWorker.TODO_DESCRIPTION to textDescription.value,
+                                                    WeeklyNotificationWorker.TODO_ID to itemId
+                                                )
+                                            )
+                                            .setInitialDelay(
+                                                startCalendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis(),
+                                                TimeUnit.MILLISECONDS
+                                            )
+                                            .build()
+                                    workManager.enqueueUniquePeriodicWork(
+                                        itemId.toString(),
+                                        ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+                                        request
+                                    )
+                                }
+                            }
+                        }
+                        3 -> {
+                            val startCalendar = Calendar.getInstance()
+                            val endCalendar = Calendar.getInstance()
+                            val timeCalendar = Calendar.getInstance()
+                            startCalendar.time = SimpleDateFormat("dd/MM/yyyy").parse(textDateStart.value)
+                            timeCalendar.time = SimpleDateFormat("HH:mm").parse(textItemStart.value)
+                            startCalendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY))
+                            startCalendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE))
+                            if (checkedRangeStart.value == true) {
+                                if (checkedItemStart.value == true) {
+                                    var numRepeats = -1L
+                                    if (checkedRangeEnd.value == true) {
+                                        endCalendar.time = SimpleDateFormat("dd/MM/yyyy").parse(textDateEnd.value)
+                                        endCalendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY))
+                                        endCalendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE))
+                                        numRepeats = (endCalendar.get(Calendar.YEAR) * 12 + endCalendar.get(Calendar.MONTH) - (startCalendar.get(Calendar.YEAR) * 12 + startCalendar.get(Calendar.MONTH)) + 1).toLong()
+                                        Log.i("Debug", "$numRepeats")
+                                    }
+                                    dataStore.edit {
+                                        it[longPreferencesKey(itemId.toString())] = numRepeats
+                                    }
+                                    val request =
+                                        OneTimeWorkRequestBuilder<MonthlyNotificationWorker>()
+                                            .setInputData(
+                                                workDataOf(
+                                                    MonthlyNotificationWorker.TODO_NAME to textName.value,
+                                                    MonthlyNotificationWorker.GROUP_NAME to groupName,
+                                                    MonthlyNotificationWorker.TODO_TIME to textItemStart.value,
+                                                    MonthlyNotificationWorker.TODO_DAY to orderSuffix(startCalendar.get(Calendar.DAY_OF_MONTH)),
+                                                    MonthlyNotificationWorker.TODO_REMIND to textRemind.value,
+                                                    MonthlyNotificationWorker.TODO_DESCRIPTION to textDescription.value,
+                                                    MonthlyNotificationWorker.TODO_ID to itemId
+                                                )
+                                            )
+                                            .setInitialDelay(
+                                                startCalendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis(),
+                                                TimeUnit.MILLISECONDS
+                                            )
+                                            .build()
+                                    workManager.enqueueUniqueWork(
+                                        itemId.toString(),
+                                        ExistingWorkPolicy.REPLACE,
+                                        request
+                                    )
+                                }
+                            }
                         }
                     }
                 }

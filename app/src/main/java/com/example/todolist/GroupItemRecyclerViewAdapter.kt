@@ -15,7 +15,9 @@ import java.text.SimpleDateFormat
 
 class GroupItemRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, private val checkedListener: (ItemInfo, Boolean) -> Unit): RecyclerView.Adapter<ItemViewHolder>() {
     private val itemsAdapter = ArrayList<ItemInfo>()
+    private var checkedItems = HashSet<Long>()
     private var expandedView = false
+    private var recyclerView: RecyclerView? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -23,16 +25,38 @@ class GroupItemRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel,
         return ItemViewHolder(itemBinding, viewModel)
     }
 
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        this.recyclerView = null
+    }
+
     override fun getItemCount(): Int {
         return itemsAdapter.size
     }
 
-    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        holder.bind(itemsAdapter[position], checkedListener, expandedView)
-    }
-
     fun expand(expanded: Boolean) {
         expandedView = expanded
+    }
+
+    fun check(itemId: Long) {
+        val position = itemsAdapter.indexOfFirst { it.id == itemId }
+        if (checkedItems.contains(itemId)) {
+            checkedItems.remove(itemId)
+        } else {
+            checkedItems.add(itemId)
+        }
+        recyclerView?.post {
+            notifyItemChanged(position)
+        }
+    }
+
+    fun isChecked(itemId: Long): Boolean {
+        return checkedItems.contains(itemId)
     }
 
     fun setList(list: List<ItemInfo>) {
@@ -40,10 +64,16 @@ class GroupItemRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel,
         itemsAdapter.clear()
         itemsAdapter.addAll(list)
     }
+
+    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
+        holder.bind(itemsAdapter[position], checkedListener, expandedView,
+            { itemId -> check(itemId) },
+            { itemId -> isChecked(itemId) })
+    }
 }
 
 class ItemViewHolder(val binding: GroupListItemBinding, val viewModel: HomeFragmentViewModel): RecyclerView.ViewHolder(binding.root) {
-    fun bind(item: ItemInfo, checkedListener: (ItemInfo, Boolean) -> Unit, expanded: Boolean) {
+    fun bind(item: ItemInfo, checkedListener: (ItemInfo, Boolean) -> Unit, expanded: Boolean, checkClickedListener: (itemId: Long) -> Unit, checkCheck: (itemId: Long) -> Boolean) {
         var repeatType = ""
         var repeatRange = ""
         var repeatTime = ""
@@ -89,18 +119,20 @@ class ItemViewHolder(val binding: GroupListItemBinding, val viewModel: HomeFragm
         binding.cbItemName.text = item.name
         binding.tvDue.text = if (item.dueDate == null) "No due date" else "Due at " + SimpleDateFormat("HH:mm").format(item.dueTime) + " " + SimpleDateFormat("dd/MM/yyyy").format(item.dueDate)
         binding.tvDescription.text = if (item.description == null) "No description" else item.description
-        binding.cbItemName.isChecked = item.checked
-        if (item.checked) {
+
+        val checked = checkCheck(item.id)
+        binding.cbItemName.setOnCheckedChangeListener(null)
+        binding.cbItemName.isChecked = checked
+        if (checked) {
             binding.cbItemName.paintFlags = binding.cbItemName.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
         } else {
             binding.cbItemName.paintFlags = binding.cbItemName.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
         }
-        binding.cbItemName.setOnCheckedChangeListener(null)
         binding.cbItemName.setOnCheckedChangeListener { _, checked ->
             Log.i("Debug", "${binding.cbItemName.isChecked} just say something bro anything")
+            checkClickedListener(item.id)
             checkedListener(item, checked)
         }
-        binding.tvRemind.text = if (item.remind != null) "Remind ${item.remind.toString()} Minutes Before" else null
-        // add remind functionality
+        binding.tvRemind.text = if (item.remind != null) "Remind ${item.remind.toString()} minutes before" else "No reminder"
     }
 }
