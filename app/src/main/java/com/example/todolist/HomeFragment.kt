@@ -18,7 +18,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.todolist.databinding.FragmentHomeBinding
 import com.example.todolist.db.GroupInfo
 import com.example.todolist.db.ItemDao
@@ -110,11 +112,6 @@ class HomeFragment : Fragment() {
             viewModel.addGroup()
             findNavController().navigate(R.id.action_homeFragment_to_addGroupFragment)
         }
-//        var builder = NotificationCompat.Builder(this, CHANNEL_ID)
-//            .setSmallIcon(R.drawable.notification_icon)
-//            .setContentTitle(textTitle)
-//            .setContentText(textContent)
-//            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         return binding.root
     }
 }

@@ -35,9 +35,11 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.min
 import com.example.todolist.DataStoreManager.dataStore
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.work.BackoffPolicy
 import com.example.todolist.workers.MonthlyNotificationWorker
 import com.example.todolist.workers.WeeklyNotificationWorker
 import java.time.DayOfWeek
+import kotlin.time.Duration
 
 class AddItemFragmentViewModel(private val application: Application, private val itemDao: ItemDao, private val todoDao: TodoDao) : AndroidViewModel(application) {
     val textName = MutableLiveData<String>()
@@ -334,7 +336,7 @@ class AddItemFragmentViewModel(private val application: Application, private val
                                                 )
                                             )
                                             .setInitialDelay(
-                                                calendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis(),
+                                                calendar.timeInMillis - ((textRemind.value!!.toInt()) * 60000) - System.currentTimeMillis(),
                                                 TimeUnit.MILLISECONDS
                                             )
                                             .build()
@@ -378,6 +380,14 @@ class AddItemFragmentViewModel(private val application: Application, private val
                                     dataStore.edit {
                                         it[longPreferencesKey(itemId.toString())] = numRepeats
                                     }
+                                    var delay = startCalendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis()
+                                    if (delay < 0) {
+                                        startCalendar.add(Calendar.DAY_OF_YEAR, 7)
+                                        delay = startCalendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis()
+                                        dataStore.edit {
+                                            it[longPreferencesKey(itemId.toString())] = numRepeats - 1
+                                        }
+                                    }
                                     val request =
                                         PeriodicWorkRequestBuilder<DailyNotificationWorker>(24, TimeUnit.HOURS)
                                             .setInputData(
@@ -391,7 +401,7 @@ class AddItemFragmentViewModel(private val application: Application, private val
                                                 )
                                             )
                                             .setInitialDelay(
-                                                startCalendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis(),
+                                                delay,
                                                 TimeUnit.MILLISECONDS
                                             )
                                             .build()
@@ -424,6 +434,14 @@ class AddItemFragmentViewModel(private val application: Application, private val
                                     dataStore.edit {
                                         it[longPreferencesKey(itemId.toString())] = numRepeats
                                     }
+                                    var delay = startCalendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis()
+                                    if (delay < 0) {
+                                        startCalendar.add(Calendar.DAY_OF_YEAR, 7)
+                                        delay = startCalendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis()
+                                        dataStore.edit {
+                                            it[longPreferencesKey(itemId.toString())] = numRepeats - 1
+                                        }
+                                    }
                                     val request =
                                         PeriodicWorkRequestBuilder<WeeklyNotificationWorker>(7, TimeUnit.DAYS)
                                             .setInputData(
@@ -438,7 +456,7 @@ class AddItemFragmentViewModel(private val application: Application, private val
                                                 )
                                             )
                                             .setInitialDelay(
-                                                startCalendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis(),
+                                                delay,
                                                 TimeUnit.MILLISECONDS
                                             )
                                             .build()
@@ -471,6 +489,14 @@ class AddItemFragmentViewModel(private val application: Application, private val
                                     dataStore.edit {
                                         it[longPreferencesKey(itemId.toString())] = numRepeats
                                     }
+                                    var delay = startCalendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis()
+                                    if (delay < 0) {
+                                        startCalendar.add(Calendar.DAY_OF_YEAR, 7)
+                                        delay = startCalendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis()
+                                        dataStore.edit {
+                                            it[longPreferencesKey(itemId.toString())] = numRepeats - 1
+                                        }
+                                    }
                                     val request =
                                         OneTimeWorkRequestBuilder<MonthlyNotificationWorker>()
                                             .setInputData(
@@ -485,7 +511,7 @@ class AddItemFragmentViewModel(private val application: Application, private val
                                                 )
                                             )
                                             .setInitialDelay(
-                                                startCalendar.timeInMillis - (textRemind.value!!.toInt() * 60000) - System.currentTimeMillis(),
+                                                delay,
                                                 TimeUnit.MILLISECONDS
                                             )
                                             .build()

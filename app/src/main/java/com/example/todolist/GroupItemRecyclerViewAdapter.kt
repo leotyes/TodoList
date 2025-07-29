@@ -56,6 +56,10 @@ class GroupItemRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel,
     }
 
     fun isChecked(itemId: Long): Boolean {
+        if (itemsAdapter[(itemsAdapter.indexOfFirst { it.id == itemId })].checked == true) {
+            checkedItems.add(itemId)
+            return true
+        }
         return checkedItems.contains(itemId)
     }
 

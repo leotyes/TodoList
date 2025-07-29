@@ -16,7 +16,6 @@ import com.example.todolist.db.TodoDatabase
 class AddGroupFragment : Fragment() {
     private lateinit var binding: FragmentAddGroupBinding
     private lateinit var viewModel: AddGroupFragmentViewModel
-    private lateinit var todoListRecyclerViewAdapter: TodoListRecyclerViewAdapter
     private lateinit var dao: TodoDao
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

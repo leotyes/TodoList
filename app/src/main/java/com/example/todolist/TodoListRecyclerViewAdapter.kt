@@ -1,11 +1,14 @@
 package com.example.todolist
 
 import android.content.Context
+import android.graphics.Canvas
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.Visibility
@@ -63,6 +66,73 @@ class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, 
 class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragmentViewModel): RecyclerView.ViewHolder(binding.root) {
     fun bind(item: GroupInfo, editListener: (GroupInfo) -> Unit, deleteListener: (GroupInfo) -> Unit, addListener: (GroupInfo) -> Unit, itemCheckedListener: (ItemInfo, Boolean) -> Unit, expandClickedListener: (groupId: Long) -> Unit, expandCheck: (groupId: Long) -> Boolean) {
         val innerAdapter = GroupItemRecyclerViewAdapter(viewModel, itemCheckedListener)
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun isLongPressDragEnabled(): Boolean {
+                return true
+            }
+
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    val itemView = viewHolder.itemView
+                    val deleteIcon = ContextCompat.getDrawable(recyclerView.context, R.drawable.baseline_delete_24)
+                    val editIcon = ContextCompat.getDrawable(recyclerView.context, R.drawable.baseline_edit_24)
+                    val deleteIconMargin = (itemView.height - deleteIcon!!.intrinsicHeight) / 2
+                    val editIconMargin = (itemView.height - editIcon!!.intrinsicHeight) / 2
+
+                    if (dX > 0) {
+                        editIcon.setBounds(
+                            itemView.left + 60,
+                            itemView.top + editIconMargin,
+                            itemView.left + 60 + editIcon.intrinsicWidth,
+                            itemView.bottom - editIconMargin
+                        )
+                        editIcon.draw(c)
+                    } else {
+                        deleteIcon.setBounds(
+                            itemView.right - 60 - deleteIcon.intrinsicWidth,
+                            itemView.top + deleteIconMargin,
+                            itemView.right - 60,
+                            itemView.bottom - deleteIconMargin
+                        )
+                        deleteIcon.draw(c)
+                    }
+                }
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+            }
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+
+                when (direction) {
+                    ItemTouchHelper.LEFT -> {
+
+                    }
+                    ItemTouchHelper.RIGHT -> {
+                        innerAdapter.notifyItemChanged(position)
+                    }
+                }
+            }
+        }
+        )
+        itemTouchHelper.attachToRecyclerView(binding.rvItems)
         binding.tvTitle.text = item.title
         binding.btnArrow.setOnClickListener {
             expandClickedListener(item.id)

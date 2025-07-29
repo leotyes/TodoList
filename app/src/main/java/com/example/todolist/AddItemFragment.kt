@@ -49,7 +49,7 @@ class AddItemFragment : Fragment() {
                 viewModel.calDue.set(Calendar.MINUTE, minute)
                 viewModel.textDueTime.value = SimpleDateFormat("HH:mm").format(viewModel.calDue.time)
             }
-            TimePickerDialog(requireContext(), timeSetListener, viewModel.calDue.get(Calendar.HOUR_OF_DAY), viewModel.calDue.get(Calendar.MINUTE), true).show()
+            TimePickerDialog(requireContext(), android.R.style.Theme_Material_Dialog, timeSetListener, viewModel.calDue.get(Calendar.HOUR_OF_DAY), viewModel.calDue.get(Calendar.MINUTE), true).show()
         }
         binding.btnDayDue.setOnClickListener {
             val dateSetListener = DatePickerDialog.OnDateSetListener { datePicker, year, month, day ->
