@@ -40,8 +40,8 @@ class HomeFragment : Fragment() {
 
         todoDao = TodoDatabase.getInstance(requireContext().applicationContext).todoDao
         itemDao = TodoDatabase.getInstance(requireContext().applicationContext).itemDao
-        val factory = HomeViewModelFactory(todoDao, itemDao)
-        viewModel = ViewModelProvider(this, factory).get(HomeFragmentViewModel(todoDao, itemDao)::class.java)
+        val factory = HomeViewModelFactory(todoDao, itemDao, requireActivity().application)
+        viewModel = ViewModelProvider(this, factory).get(HomeFragmentViewModel(todoDao, itemDao, requireActivity().application)::class.java)
     }
 
     override fun onCreateView(

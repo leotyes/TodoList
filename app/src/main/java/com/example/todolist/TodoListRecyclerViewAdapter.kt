@@ -123,7 +123,7 @@ class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragme
 
                 when (direction) {
                     ItemTouchHelper.LEFT -> {
-
+                        innerAdapter.deleteItem(position)
                     }
                     ItemTouchHelper.RIGHT -> {
                         innerAdapter.notifyItemChanged(position)

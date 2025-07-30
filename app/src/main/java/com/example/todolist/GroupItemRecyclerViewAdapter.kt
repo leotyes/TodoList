@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.WorkManager
 import com.example.todolist.databinding.GroupListItemBinding
 import com.example.todolist.db.GroupInfo
 import com.example.todolist.db.ItemInfo
@@ -53,6 +54,10 @@ class GroupItemRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel,
         recyclerView?.post {
             notifyItemChanged(position)
         }
+    }
+
+    fun deleteItem(itemPos: Int) {
+        viewModel.deleteItem(itemsAdapter[itemPos])
     }
 
     fun isChecked(itemId: Long): Boolean {

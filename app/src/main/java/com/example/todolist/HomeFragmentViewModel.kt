@@ -1,5 +1,6 @@
 package com.example.todolist
 
+import android.app.Application
 import android.content.Context
 import android.util.Log
 import android.util.TypedValue
@@ -8,13 +9,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkManager
 import com.example.todolist.db.GroupInfo
 import com.example.todolist.db.ItemDao
 import com.example.todolist.db.ItemInfo
 import com.example.todolist.db.TodoDao
 import kotlinx.coroutines.launch
 
-class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: ItemDao) : ViewModel() {
+class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: ItemDao, private val application: Application) : ViewModel() {
     val groups = todoDao.getItems()
     val items = itemDao.getItems()
     val textNewGroupName = MutableLiveData<String>()
@@ -62,6 +64,17 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
 
     }
 
+    fun deleteItem(item: ItemInfo) {
+        viewModelScope.launch {
+            WorkManager.getInstance(application).cancelUniqueWork(item.id.toString())
+            itemDao.deleteItem(item)
+        }
+    }
+
+    fun editItem(item: ItemInfo) {
+
+    }
+
     fun itemChecked(item: ItemInfo, checked: Boolean) {
         viewModelScope.launch {
             itemDao.editItem(
@@ -86,6 +99,7 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     }
 
     fun deleteGroup(item: GroupInfo) {
+//        TODO make sure to remove all notifs associated with grouped items
         viewModelScope.launch {
             itemDao.deleteGroupedItems(item.id)
             todoDao.deleteItem(item)
