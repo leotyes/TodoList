@@ -14,13 +14,360 @@
         android:layout_height="match_parent"
         tools:context=".HomeFragment">
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cvEditItem"
+            android:layout_width="375dp"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="15dp">
+
+                <TextView
+                    android:id="@+id/tvEditItem"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins"
+                    android:text="@string/edit_item"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etItemName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:fontFamily="@font/poppins"
+                    android:hint="@string/name"
+                    android:inputType="text"
+                    android:text="@={viewModel.textName}" />
+
+                <EditText
+                    android:id="@+id/etItemDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:fontFamily="@font/poppins"
+                    android:hint="@string/description"
+                    android:inputType="text|textMultiLine"
+                    android:maxLines="5"
+                    android:singleLine="false"
+                    android:text="@={viewModel.textDescription}" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <CheckBox
+                        android:id="@+id/cbDue"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.checkedDue}"
+                        android:fontFamily="@font/poppins"
+                        android:singleLine="true"
+                        android:text="@string/due"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnTimeDue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:layout_weight="1"
+                        android:elevation="4dp"
+                        android:fontFamily="@font/poppins"
+                        android:text="@={viewModel.textDueTime}"
+                        android:textColor="#FFFFFF"
+                        app:cornerRadius="15dp" />
+
+                    <Button
+                        android:id="@+id/btnDayDue"
+                        android:layout_width="36dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:elevation="4dp"
+                        android:fontFamily="@font/poppins"
+                        android:maxLines="2"
+                        android:text="@={viewModel.textDueDate}"
+                        android:textColor="#FFFFFF"
+                        app:cornerRadius="15dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <CheckBox
+                        android:id="@+id/cbDaily"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.checkedDaily}"
+                        android:fontFamily="@font/poppins"
+                        android:text="@string/daily" />
+
+                    <CheckBox
+                        android:id="@+id/cbWeekly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.checkedWeekly}"
+                        android:fontFamily="@font/poppins"
+                        android:text="@string/weekly" />
+
+                    <CheckBox
+                        android:id="@+id/cbMonthly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.checkedMonthly}"
+                        android:fontFamily="@font/poppins"
+                        android:text="@string/monthly" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/llDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <CheckBox
+                        android:id="@+id/cbDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.checkedItemDate}"
+                        android:fontFamily="@font/poppins"
+                        android:singleLine="true"
+                        android:text="@string/date"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnItemDay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="75dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_weight="1"
+                        android:elevation="4dp"
+                        android:fontFamily="@font/poppins"
+                        android:maxLines="1"
+                        android:text="@={viewModel.textItemDate}"
+                        android:textColor="#FFFFFF"
+                        app:cornerRadius="15dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/llRangeStart"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <CheckBox
+                        android:id="@+id/cbStartDate"
+                        android:layout_width="14dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.checkedRangeStart}"
+                        android:fontFamily="@font/poppins"
+                        android:singleLine="true"
+                        android:text="@string/start_date"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnStartDate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_weight="1"
+                        android:elevation="4dp"
+                        android:fontFamily="@font/poppins"
+                        android:maxLines="1"
+                        android:text="@={viewModel.textDateStart}"
+                        android:textColor="#FFFFFF"
+                        app:cornerRadius="15dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/llRangeEnd"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <CheckBox
+                        android:id="@+id/cbEndDate"
+                        android:layout_width="4dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.checkedRangeEnd}"
+                        android:fontFamily="@font/poppins"
+                        android:singleLine="true"
+                        android:text="@string/end_date"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnEndDate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="30dp"
+                        android:layout_weight="1"
+                        android:elevation="4dp"
+                        android:fontFamily="@font/poppins"
+                        android:maxLines="1"
+                        android:text="@={viewModel.textDateEnd}"
+                        android:textColor="#FFFFFF"
+                        app:cornerRadius="15dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/llStartTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <CheckBox
+                        android:id="@+id/cbStartTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.checkedItemStart}"
+                        android:fontFamily="@font/poppins"
+                        android:singleLine="true"
+                        android:text="@string/start_time"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnItemStart"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_weight="1"
+                        android:elevation="4dp"
+                        android:fontFamily="@font/poppins"
+                        android:maxLines="1"
+                        android:text="@={viewModel.textItemStart}"
+                        android:textColor="#FFFFFF"
+                        app:cornerRadius="15dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/llEndTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <CheckBox
+                        android:id="@+id/cbEndTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.checkedItemEnd}"
+                        android:fontFamily="@font/poppins"
+                        android:singleLine="true"
+                        android:text="@string/end_time"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnItemEnd"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="30dp"
+                        android:layout_weight="1"
+                        android:elevation="4dp"
+                        android:fontFamily="@font/poppins"
+                        android:maxLines="1"
+                        android:text="@={viewModel.textItemEnd}"
+                        android:textColor="#FFFFFF"
+                        app:cornerRadius="15dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/llRemind"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <CheckBox
+                        android:id="@+id/cbRemind"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.checkedRemind}"
+                        android:fontFamily="@font/poppins"
+                        android:singleLine="true"
+                        android:text="@string/remind"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/etRemind"
+                        android:layout_width="1dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ems="10"
+                        android:fontFamily="@font/poppins"
+                        android:hint="@string/minutes"
+                        android:inputType="text"
+                        android:maxLength="3"
+                        android:text="@={viewModel.textRemind}"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/tvRemindBefore"
+                        android:layout_width=".00000001dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="-75dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/poppins"
+                        android:gravity="end"
+                        android:text="@string/before"
+                        android:textSize="18sp" />
+
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnItemDone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins"
+                    android:text="@string/done"
+                    android:textSize="18sp"
+                    app:cornerRadius="15dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
         <View
             android:id="@+id/view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="#BF000000"
             android:clickable="true"
-            android:elevation="7dp"
+            android:elevation="10dp"
             android:focusable="true"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -60,6 +60,10 @@ class GroupItemRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel,
         viewModel.deleteItem(itemsAdapter[itemPos])
     }
 
+    fun editItem(itemPos: Int) {
+        viewModel.editItem(itemsAdapter[itemPos])
+    }
+
     fun isChecked(itemId: Long): Boolean {
         if (itemsAdapter[(itemsAdapter.indexOfFirst { it.id == itemId })].checked == true) {
             checkedItems.add(itemId)

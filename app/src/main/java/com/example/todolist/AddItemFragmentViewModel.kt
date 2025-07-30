@@ -67,7 +67,6 @@ class AddItemFragmentViewModel(private val application: Application, private val
     val minDateInMillisDue = MutableLiveData<Long>()
     val minEndTime = MutableLiveData<Int>()
     val checkedRange = MutableLiveData<Boolean>()
-    val clickableTimes = MutableLiveData<Boolean>()
     val parentGroup = MutableLiveData<Long>()
     val calStartDate = Calendar.getInstance()
     val calDate = Calendar.getInstance()

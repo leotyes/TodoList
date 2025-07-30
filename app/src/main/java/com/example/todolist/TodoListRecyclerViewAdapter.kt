@@ -127,6 +127,7 @@ class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragme
                     }
                     ItemTouchHelper.RIGHT -> {
                         innerAdapter.notifyItemChanged(position)
+                        innerAdapter.editItem(position)
                     }
                 }
             }

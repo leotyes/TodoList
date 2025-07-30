@@ -2,6 +2,7 @@ package com.example.todolist
 
 import android.app.Application
 import android.content.Context
+import android.icu.util.Calendar
 import android.util.Log
 import android.util.TypedValue
 import androidx.constraintlayout.widget.Group
@@ -21,11 +22,36 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     val items = itemDao.getItems()
     val textNewGroupName = MutableLiveData<String>()
     val editingGroup = MutableLiveData<Long>()
-    val inspectTitle = MutableLiveData<String>()
-    val inspectDescription = MutableLiveData<String>()
-    val inspectDue = MutableLiveData<String>()
-    val inspectRange = MutableLiveData<String>()
-    val inspectRemind = MutableLiveData<String>()
+    val textName = MutableLiveData<String>()
+    val textDescription = MutableLiveData<String>()
+    val textDueTime = MutableLiveData<String>()
+    val textDueDate = MutableLiveData<String>()
+    val textItemDate = MutableLiveData<String>()
+    val textItemStart = MutableLiveData<String>()
+    val textItemEnd = MutableLiveData<String>()
+    val textDateStart = MutableLiveData<String>()
+    val textDateEnd = MutableLiveData<String>()
+    val textRemind = MutableLiveData<String>()
+    val checkedDue = MutableLiveData<Boolean>()
+    val checkedItemDate = MutableLiveData<Boolean>()
+    val checkedItemStart = MutableLiveData<Boolean>()
+    val checkedItemEnd = MutableLiveData<Boolean>()
+    val checkedRangeStart = MutableLiveData<Boolean>()
+    val checkedRangeEnd = MutableLiveData<Boolean>()
+    val checkedDaily = MutableLiveData<Boolean>()
+    val checkedWeekly = MutableLiveData<Boolean>()
+    val checkedMonthly = MutableLiveData<Boolean>()
+    val checkedRemind = MutableLiveData<Boolean>()
+    val minDateInMillisStart = MutableLiveData<Long>()
+    val minDateInMillisEnd = MutableLiveData<Long>()
+    val minDateInMillisDue = MutableLiveData<Long>()
+    val minEndTime = MutableLiveData<Int>()
+    val checkedRange = MutableLiveData<Boolean>()
+    val parentGroup = MutableLiveData<Long>()
+    val calStartDate = Calendar.getInstance()
+    val calDate = Calendar.getInstance()
+    val calEndDate = Calendar.getInstance()
+    val calDue = Calendar.getInstance()
 
     init {
         textNewGroupName.value = ""

@@ -10,18 +10,22 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.todolist.databinding.FragmentAddGroupBinding
 import com.example.todolist.databinding.FragmentHomeBinding
+import com.example.todolist.db.ItemDao
 import com.example.todolist.db.TodoDao
 import com.example.todolist.db.TodoDatabase
 
 class AddGroupFragment : Fragment() {
     private lateinit var binding: FragmentAddGroupBinding
     private lateinit var viewModel: AddGroupFragmentViewModel
-    private lateinit var dao: TodoDao
+    private lateinit var todoDao: TodoDao
+    private lateinit var itemDao: ItemDao
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        dao = TodoDatabase.getInstance(requireContext().applicationContext).todoDao
-        viewModel = ViewModelProvider(this).get(AddGroupFragmentViewModel()::class.java)
+        todoDao = TodoDatabase.getInstance(requireContext().applicationContext).todoDao
+        itemDao = TodoDatabase.getInstance(requireContext().applicationContext).itemDao
+        val factory = AddGroupViewModelFactory(todoDao, itemDao, requireActivity().application)
+        viewModel = ViewModelProvider(this, factory).get(AddGroupFragmentViewModel(todoDao, itemDao, requireActivity().application)::class.java)
     }
 
     override fun onCreateView(
@@ -32,7 +36,7 @@ class AddGroupFragment : Fragment() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
         binding.btnDone.setOnClickListener {
-            viewModel.addGroup(dao)
+            viewModel.addGroup()
         }
         viewModel.groupResult.observe(viewLifecycleOwner) { result ->
             Toast.makeText(requireContext(), result, Toast.LENGTH_SHORT).show()
