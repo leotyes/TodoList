@@ -125,10 +125,16 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     }
 
     fun deleteGroup(item: GroupInfo) {
-//        TODO make sure to remove all notifs associated with grouped items
-        viewModelScope.launch {
-            itemDao.deleteGroupedItems(item.id)
-            todoDao.deleteItem(item)
+        itemDao.getGroupedItems(item.id).observeForever {
+            viewModelScope.launch {
+                if (it != null) {
+                    for (itemDelete in it) {
+                        WorkManager.getInstance(application).cancelUniqueWork(itemDelete.id.toString())
+                    }
+                    itemDao.deleteGroupedItems(item.id)
+                    todoDao.deleteItem(item)
+                }
+            }
         }
     }
 

@@ -18,6 +18,7 @@
             android:id="@+id/cvEditItem"
             android:layout_width="375dp"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             app:cardCornerRadius="15dp"
             app:cardElevation="15dp"
             app:layout_constraintBottom_toBottomOf="parent"
