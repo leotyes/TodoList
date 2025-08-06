@@ -1,9 +1,12 @@
 package com.example.todolist
 
+import android.app.DatePickerDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.pm.PackageManager
+import android.icu.util.Calendar
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -27,6 +30,7 @@ import com.example.todolist.db.ItemDao
 import com.example.todolist.db.ItemInfo
 import com.example.todolist.db.TodoDao
 import com.example.todolist.db.TodoDatabase
+import java.text.SimpleDateFormat
 import kotlin.math.abs
 
 class HomeFragment : Fragment() {
@@ -52,6 +56,27 @@ class HomeFragment : Fragment() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
         binding.rvGroups.layoutManager = LinearLayoutManager(requireContext().applicationContext)
+        viewModel.visibleEdit.observe(viewLifecycleOwner) {
+            binding.cvEditItem.visibility = if (it) View.VISIBLE else View.GONE
+            binding.view.visibility = if (it) View.VISIBLE else View.GONE
+        }
+        viewModel.visibleEditRanges.observe(viewLifecycleOwner) {
+            binding.llRangeStart.visibility = if (it) View.VISIBLE else View.GONE
+            binding.llRangeEnd.visibility = if (it) View.VISIBLE else View.GONE
+            binding.llDate.visibility = if (it) View.GONE else View.VISIBLE
+        }
+        viewModel.visibleEditTimes.observe(viewLifecycleOwner) {
+            binding.llStartTime.visibility = if (it) View.VISIBLE else View.GONE
+            binding.llEndTime.visibility = if (it) View.VISIBLE else View.GONE
+        }
+        viewModel.visibleEditRemind.observe(viewLifecycleOwner) {
+            binding.llRemind.visibility = if (it) View.VISIBLE else View.GONE
+        }
+        binding.view.setOnClickListener {
+            viewModel.visibleEdit.value = false
+            binding.cvEditName.visibility = View.GONE
+            binding.view.visibility = View.GONE
+        }
         val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted: Boolean ->
             if (granted) {
                 Toast.makeText(requireContext(), "Notification permission granted", Toast.LENGTH_SHORT).show()
@@ -81,7 +106,6 @@ class HomeFragment : Fragment() {
             },
             {
                 selectedGroup: GroupInfo -> viewModel.addItem(selectedGroup)
-//                Log.i("Debugging", selectedGroup.toString())
                 val action = HomeFragmentDirections.actionHomeFragmentToAddItemFragment(selectedGroup.id)
                 findNavController().navigate(action)
             },
@@ -111,6 +135,213 @@ class HomeFragment : Fragment() {
         binding.fabAdd.setOnClickListener {
             viewModel.addGroup()
             findNavController().navigate(R.id.action_homeFragment_to_addGroupFragment)
+        }
+        binding.btnTimeDue.setOnClickListener {
+            val timeSetListener = TimePickerDialog.OnTimeSetListener { timePicker, hour, minute ->
+                viewModel.calDue.set(Calendar.HOUR_OF_DAY, hour)
+                viewModel.calDue.set(Calendar.MINUTE, minute)
+                viewModel.textEditDueTime.value = SimpleDateFormat("HH:mm").format(viewModel.calDue.time)
+            }
+            TimePickerDialog(requireContext(), android.R.style.Theme_Material_Dialog, timeSetListener, viewModel.calDue.get(
+                Calendar.HOUR_OF_DAY), viewModel.calDue.get(Calendar.MINUTE), true).show()
+        }
+        binding.btnDayDue.setOnClickListener {
+            val dateSetListener = DatePickerDialog.OnDateSetListener { datePicker, year, month, day ->
+                viewModel.calDue.set(Calendar.DAY_OF_MONTH, day)
+                viewModel.calDue.set(Calendar.MONTH, month)
+                viewModel.calDue.set(Calendar.YEAR, year)
+                viewModel.textEditDueDate.value = SimpleDateFormat("dd/MM/yyyy").format(viewModel.calDue.time)
+            }
+            val datePickerDialog = DatePickerDialog(
+                requireContext(),
+                dateSetListener,
+                2025,
+                0,
+                1
+            )
+            datePickerDialog.datePicker.minDate = viewModel.minDateInMillisDue.value!!
+            datePickerDialog.show()
+        }
+        binding.btnItemDay.setOnClickListener {
+            val dateSetListener = DatePickerDialog.OnDateSetListener { datePicker, year, month, day ->
+                viewModel.calDate.set(Calendar.DAY_OF_MONTH, day)
+                viewModel.calDate.set(Calendar.MONTH, month)
+                viewModel.calDate.set(Calendar.YEAR, year)
+                viewModel.textEditItemDate.value = SimpleDateFormat("dd/MM/yyyy").format(viewModel.calDate.time)
+            }
+            val datePickerDialog = DatePickerDialog(
+                requireContext(),
+                dateSetListener,
+                2025,
+                0,
+                1
+            )
+            datePickerDialog.datePicker.minDate = viewModel.minDateInMillisStart.value!!
+            datePickerDialog.show()
+        }
+        val startTimeSetListener = TimePickerDialog.OnTimeSetListener { timePicker, hour, minute ->
+            viewModel.calDate.set(Calendar.HOUR_OF_DAY, hour)
+            viewModel.calDate.set(Calendar.MINUTE, minute)
+            viewModel.textEditItemStart.value = SimpleDateFormat("HH:mm").format(viewModel.calDate.time)
+            viewModel.calcMinEndTime(hour, minute, 0)
+        }
+        val endTimeSetListener = TimePickerDialog.OnTimeSetListener { timePicker, hour, minute ->
+            viewModel.calStartDate.set(Calendar.HOUR_OF_DAY, hour)
+            viewModel.calStartDate.set(Calendar.MINUTE, minute)
+            viewModel.textEditItemEnd.value = SimpleDateFormat("HH:mm").format(viewModel.calStartDate.time)
+            viewModel.calcMinEndTime(hour, minute, 1)
+        }
+        binding.btnItemStart.setOnClickListener {
+            TimePickerDialog(requireContext(), android.R.style.Theme_Material_Dialog, startTimeSetListener, viewModel.calDate.get(
+                Calendar.HOUR_OF_DAY), viewModel.calDate.get(Calendar.MINUTE), true).show()
+        }
+        binding.btnItemEnd.setOnClickListener {
+            TimePickerDialog(requireContext(), android.R.style.Theme_Material_Dialog, endTimeSetListener, viewModel.calStartDate.get(
+                Calendar.HOUR_OF_DAY), viewModel.calStartDate.get(Calendar.MINUTE), true).show()
+        }
+        binding.cbDate.setOnClickListener {
+            if (viewModel.checkedEditItemDate.value == false) {
+                if (viewModel.checkedEditRangeStart.value != true && viewModel.checkedEditRangeEnd.value != true && viewModel.checkedEditDaily.value != true) {
+                    viewModel.visibleEditTimes.value = false
+                }
+            } else {
+                viewModel.visibleEditTimes.value = true
+            }
+            viewModel.visibleEditRemind.value = viewModel.remindVisibility(binding.llStartTime.visibility)
+        }
+        binding.btnItemDone.setOnClickListener {
+//            val result = viewModel.addItem()
+//            Toast.makeText(requireContext(), result, Toast.LENGTH_LONG).show()
+            binding.cvEditItem.visibility = View.GONE
+            binding.view.visibility = View.GONE
+            viewModel.editItemFinish()
+        }
+        // TODO change all binding to viewModel
+        binding.cbDaily.setOnClickListener {
+            if (viewModel.checkedEditDaily.value == true) {
+                viewModel.checkedEditWeekly.value = false
+                viewModel.checkedEditMonthly.value = false
+                viewModel.checkedEditItemDate.value = false
+                viewModel.visibleEditRanges.value = true
+                viewModel.visibleEditTimes.value = true
+                viewModel.calcMinEndDate()
+            } else {
+                viewModel.visibleEditRanges.value = false
+                viewModel.checkedEditRangeStart.value = false
+                viewModel.checkedEditRangeEnd.value = false
+                if (viewModel.checkedEditItemDate.value == true) {
+                    viewModel.visibleEditTimes.value = true
+                } else {
+                    viewModel.visibleEditTimes.value = false
+                }
+            }
+            viewModel.visibleEditRemind.value = viewModel.remindVisibility(binding.llStartTime.visibility)
+        }
+        binding.cbWeekly.setOnClickListener {
+            if (viewModel.checkedEditWeekly.value == true) {
+                viewModel.checkedEditDaily.value = false
+                viewModel.checkedEditMonthly.value = false
+                viewModel.checkedEditItemDate.value = false
+                viewModel.visibleEditRanges.value = true
+                if (viewModel.checkedEditRangeStart.value != true && viewModel.checkedEditRangeEnd.value != true) {
+                    viewModel.visibleEditTimes.value = false
+                }
+                viewModel.calcMinEndDate()
+            } else {
+                viewModel.visibleEditRanges.value = false
+                viewModel.checkedEditRangeStart.value = false
+                viewModel.checkedEditRangeEnd.value = false
+                if (viewModel.checkedEditItemDate.value == true) {
+                    viewModel.visibleEditTimes.value = true
+                } else {
+                    viewModel.visibleEditTimes.value = false
+                }
+            }
+            viewModel.visibleEditRemind.value = viewModel.remindVisibility(binding.llStartTime.visibility)
+        }
+        binding.cbMonthly.setOnClickListener {
+            if (viewModel.checkedEditMonthly.value == true) {
+                viewModel.checkedEditWeekly.value = false
+                viewModel.checkedEditDaily.value = false
+                viewModel.checkedEditItemDate.value = false
+                viewModel.visibleEditRanges.value = true
+                if (viewModel.checkedEditRangeStart.value != true && viewModel.checkedEditRangeEnd.value != true) {
+                    viewModel.visibleEditTimes.value = false
+                }
+                viewModel.calcMinEndDate()
+            } else {
+                viewModel.visibleEditRanges.value = true
+                if (viewModel.checkedEditItemDate.value == true) {
+                    viewModel.visibleEditTimes.value = true
+                } else {
+                    viewModel.visibleEditTimes.value = false
+                }
+            }
+            viewModel.visibleEditRemind.value = viewModel.remindVisibility(binding.llStartTime.visibility)
+        }
+        binding.cbStartDate.setOnClickListener {
+            if (viewModel.checkedEditRangeStart.value == true || viewModel.checkedEditRangeEnd.value == true) {
+                viewModel.visibleEditTimes.value = true
+            } else {
+                if (viewModel.checkedEditItemDate.value != true && viewModel.checkedEditDaily.value != true) {
+                    viewModel.visibleEditTimes.value = false
+                }
+            }
+            viewModel.visibleEditRemind.value = viewModel.remindVisibility(binding.llStartTime.visibility)
+        }
+        binding.cbEndDate.setOnClickListener {
+            if (viewModel.checkedEditRangeStart.value == true || viewModel.checkedEditRangeEnd.value == true) {
+                viewModel.visibleEditTimes.value = true
+            } else {
+                if (viewModel.checkedEditItemDate.value != true && viewModel.checkedEditDaily.value != true) {
+                    viewModel.visibleEditTimes.value = false
+                }
+            }
+            viewModel.visibleEditRemind.value = viewModel.remindVisibility(binding.llStartTime.visibility)
+        }
+        binding.cbStartTime.setOnClickListener {
+            if (viewModel.checkedEditItemStart.value == true) {
+                viewModel.visibleEditRemind.value = viewModel.remindVisibility(binding.llStartTime.visibility)
+                viewModel.calcMinEndTime(source = 2)
+            } else {
+                viewModel.visibleEditRemind.value = viewModel.remindVisibility(binding.llStartTime.visibility)
+            }
+        }
+        val dateStartSetListener = DatePickerDialog.OnDateSetListener { datePicker, year, month, day ->
+            viewModel.calStartDate.set(Calendar.DAY_OF_MONTH, day)
+            viewModel.calStartDate.set(Calendar.MONTH, month)
+            viewModel.calStartDate.set(Calendar.YEAR, year)
+            viewModel.textEditDateStart.value = SimpleDateFormat("dd/MM/yyyy").format(viewModel.calStartDate.time)
+            viewModel.calcMinEndDate()
+        }
+        val dateEndSetListener = DatePickerDialog.OnDateSetListener { datePicker, year, month, day ->
+            viewModel.calEndDate.set(Calendar.DAY_OF_MONTH, day)
+            viewModel.calEndDate.set(Calendar.MONTH, month)
+            viewModel.calEndDate.set(Calendar.YEAR, year)
+            viewModel.textEditDateEnd.value = SimpleDateFormat("dd/MM/yyyy").format(viewModel.calEndDate.time)
+            viewModel.roundEndDate(year, month, day)
+        }
+        binding.btnStartDate.setOnClickListener {
+            val datePickerDialog = DatePickerDialog(
+                requireContext(),
+                dateStartSetListener,
+                2025,
+                0,
+                1
+            )
+            datePickerDialog.datePicker.minDate = viewModel.minDateInMillisStart.value!!
+            datePickerDialog.show()
+        }
+        binding.btnEndDate.setOnClickListener {
+            val datePickerDialog = DatePickerDialog(
+                requireContext(),
+                dateEndSetListener,
+                2025,
+                0,
+                1
+            )
+            datePickerDialog.datePicker.minDate = viewModel.minDateInMillisEnd.value!!
+            datePickerDialog.show()
         }
         return binding.root
     }

@@ -49,7 +49,7 @@
                     android:fontFamily="@font/poppins"
                     android:hint="@string/name"
                     android:inputType="text"
-                    android:text="@={viewModel.textName}" />
+                    android:text="@={viewModel.textEditName}" />
 
                 <EditText
                     android:id="@+id/etItemDescription"
@@ -61,7 +61,7 @@
                     android:inputType="text|textMultiLine"
                     android:maxLines="5"
                     android:singleLine="false"
-                    android:text="@={viewModel.textDescription}" />
+                    android:text="@={viewModel.textEditDescription}" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -73,7 +73,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:checked="@={viewModel.checkedDue}"
+                        android:checked="@={viewModel.checkedEditDue}"
                         android:fontFamily="@font/poppins"
                         android:singleLine="true"
                         android:text="@string/due"
@@ -87,7 +87,7 @@
                         android:layout_weight="1"
                         android:elevation="4dp"
                         android:fontFamily="@font/poppins"
-                        android:text="@={viewModel.textDueTime}"
+                        android:text="@={viewModel.textEditDueTime}"
                         android:textColor="#FFFFFF"
                         app:cornerRadius="15dp" />
 
@@ -99,7 +99,7 @@
                         android:elevation="4dp"
                         android:fontFamily="@font/poppins"
                         android:maxLines="2"
-                        android:text="@={viewModel.textDueDate}"
+                        android:text="@={viewModel.textEditDueDate}"
                         android:textColor="#FFFFFF"
                         app:cornerRadius="15dp" />
 
@@ -115,7 +115,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:checked="@={viewModel.checkedDaily}"
+                        android:checked="@={viewModel.checkedEditDaily}"
                         android:fontFamily="@font/poppins"
                         android:text="@string/daily" />
 
@@ -124,7 +124,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:checked="@={viewModel.checkedWeekly}"
+                        android:checked="@={viewModel.checkedEditWeekly}"
                         android:fontFamily="@font/poppins"
                         android:text="@string/weekly" />
 
@@ -133,7 +133,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:checked="@={viewModel.checkedMonthly}"
+                        android:checked="@={viewModel.checkedEditMonthly}"
                         android:fontFamily="@font/poppins"
                         android:text="@string/monthly" />
 
@@ -143,14 +143,15 @@
                     android:id="@+id/llDate"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:visibility="visible">
 
                     <CheckBox
                         android:id="@+id/cbDate"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:checked="@={viewModel.checkedItemDate}"
+                        android:checked="@={viewModel.checkedEditItemDate}"
                         android:fontFamily="@font/poppins"
                         android:singleLine="true"
                         android:text="@string/date"
@@ -166,7 +167,7 @@
                         android:elevation="4dp"
                         android:fontFamily="@font/poppins"
                         android:maxLines="1"
-                        android:text="@={viewModel.textItemDate}"
+                        android:text="@={viewModel.textEditItemDate}"
                         android:textColor="#FFFFFF"
                         app:cornerRadius="15dp" />
 
@@ -184,7 +185,7 @@
                         android:layout_width="14dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:checked="@={viewModel.checkedRangeStart}"
+                        android:checked="@={viewModel.checkedEditRangeStart}"
                         android:fontFamily="@font/poppins"
                         android:singleLine="true"
                         android:text="@string/start_date"
@@ -199,7 +200,7 @@
                         android:elevation="4dp"
                         android:fontFamily="@font/poppins"
                         android:maxLines="1"
-                        android:text="@={viewModel.textDateStart}"
+                        android:text="@={viewModel.textEditDateStart}"
                         android:textColor="#FFFFFF"
                         app:cornerRadius="15dp" />
 
@@ -217,7 +218,7 @@
                         android:layout_width="4dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:checked="@={viewModel.checkedRangeEnd}"
+                        android:checked="@={viewModel.checkedEditRangeEnd}"
                         android:fontFamily="@font/poppins"
                         android:singleLine="true"
                         android:text="@string/end_date"
@@ -232,7 +233,7 @@
                         android:elevation="4dp"
                         android:fontFamily="@font/poppins"
                         android:maxLines="1"
-                        android:text="@={viewModel.textDateEnd}"
+                        android:text="@={viewModel.textEditDateEnd}"
                         android:textColor="#FFFFFF"
                         app:cornerRadius="15dp" />
 
@@ -250,7 +251,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:checked="@={viewModel.checkedItemStart}"
+                        android:checked="@={viewModel.checkedEditItemStart}"
                         android:fontFamily="@font/poppins"
                         android:singleLine="true"
                         android:text="@string/start_time"
@@ -265,7 +266,7 @@
                         android:elevation="4dp"
                         android:fontFamily="@font/poppins"
                         android:maxLines="1"
-                        android:text="@={viewModel.textItemStart}"
+                        android:text="@={viewModel.textEditItemStart}"
                         android:textColor="#FFFFFF"
                         app:cornerRadius="15dp" />
 
@@ -283,7 +284,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:checked="@={viewModel.checkedItemEnd}"
+                        android:checked="@={viewModel.checkedEditItemEnd}"
                         android:fontFamily="@font/poppins"
                         android:singleLine="true"
                         android:text="@string/end_time"
@@ -298,7 +299,7 @@
                         android:elevation="4dp"
                         android:fontFamily="@font/poppins"
                         android:maxLines="1"
-                        android:text="@={viewModel.textItemEnd}"
+                        android:text="@={viewModel.textEditItemEnd}"
                         android:textColor="#FFFFFF"
                         app:cornerRadius="15dp" />
 
@@ -316,7 +317,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:checked="@={viewModel.checkedRemind}"
+                        android:checked="@={viewModel.checkedEditRemind}"
                         android:fontFamily="@font/poppins"
                         android:singleLine="true"
                         android:text="@string/remind"
@@ -332,7 +333,7 @@
                         android:hint="@string/minutes"
                         android:inputType="text"
                         android:maxLength="3"
-                        android:text="@={viewModel.textRemind}"
+                        android:text="@={viewModel.textEditRemind}"
                         android:textSize="18sp" />
 
                     <TextView

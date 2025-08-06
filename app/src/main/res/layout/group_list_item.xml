@@ -28,62 +28,55 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
 
+        <!--TODO fix the ui here it looks bad-->
+
         <TextView
             android:id="@+id/tvTime"
-            android:layout_width="0dp"
+            android:layout_width="302dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="25dp"
             android:fontFamily="@font/poppins"
             android:text="Time"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/cbItemName"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tvDue"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="25dp"
-            android:fontFamily="@font/poppins"
-            android:text="Due"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/cbItemName"
-            app:layout_constraintTop_toBottomOf="@+id/tvTime"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cbItemName" />
 
         <TextView
             android:id="@+id/tvRemind"
-            android:layout_width="0dp"
+            android:layout_width="302dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="25dp"
             android:fontFamily="@font/poppins"
             android:text="Remind"
             android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/tvDescription"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/cbItemName"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvDue"
             app:layout_constraintVertical_bias="0.0" />
 
-        <!--TODO fix the ui here it looks bad-->
+        <TextView
+            android:id="@+id/tvDue"
+            android:layout_width="302dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins"
+            android:text="Due"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvTime" />
+
         <TextView
             android:id="@+id/tvDescription"
-            android:layout_width="0dp"
+            android:layout_width="360dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="16dp"
             android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur scelerisque euismod velit et dignissim. Duis imperdiet bibendum semper. Pellentesque quis sodales enim. Nunc molestie neque et nibh feugiat ultricies. Phasellus augue metus, vestibulum quis gravida ornare, bibendum sed lacus. Aliquam erat volutpat. Suspendisse rutrum venenatis nunc. Curabitur vitae tincidunt orci. Suspendisse molestie blandit libero in luctus."
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvRemind"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

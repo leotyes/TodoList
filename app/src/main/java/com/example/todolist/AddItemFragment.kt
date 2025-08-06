@@ -155,9 +155,11 @@ class AddItemFragment : Fragment() {
                 binding.llDate.visibility = View.GONE
                 binding.llRangeEnd.visibility = View.VISIBLE
                 binding.llRangeStart.visibility = View.VISIBLE
-                binding.llStartTime.visibility = View.VISIBLE
-                binding.llEndTime.visibility = View.VISIBLE
                 binding.llRemind.visibility = viewModel.remindVisibility(binding.llStartTime.visibility)
+                if (viewModel.checkedRangeStart.value != true && viewModel.checkedRangeEnd.value != true) {
+                    binding.llStartTime.visibility = View.GONE
+                    binding.llEndTime.visibility = View.GONE
+                }
                 viewModel.calcMinEndDate()
             } else {
                 binding.llDate.visibility = View.VISIBLE
@@ -181,9 +183,11 @@ class AddItemFragment : Fragment() {
                 binding.llDate.visibility = View.GONE
                 binding.llRangeEnd.visibility = View.VISIBLE
                 binding.llRangeStart.visibility = View.VISIBLE
-                binding.llStartTime.visibility = View.VISIBLE
-                binding.llEndTime.visibility = View.VISIBLE
                 binding.llRemind.visibility = viewModel.remindVisibility(binding.llStartTime.visibility)
+                if (viewModel.checkedRangeStart.value != true && viewModel.checkedRangeEnd.value != true) {
+                    binding.llStartTime.visibility = View.GONE
+                    binding.llEndTime.visibility = View.GONE
+                }
                 viewModel.calcMinEndDate()
             } else {
                 binding.llDate.visibility = View.VISIBLE
@@ -206,6 +210,30 @@ class AddItemFragment : Fragment() {
             } else {
                 binding.llRemind.visibility = viewModel.remindVisibility(binding.llStartTime.visibility)
             }
+        }
+        binding.cbStartDate.setOnClickListener {
+            if (viewModel.checkedRangeStart.value == true || viewModel.checkedRangeEnd.value == true) {
+                binding.llStartTime.visibility = View.VISIBLE
+                binding.llEndTime.visibility = View.VISIBLE
+            } else {
+                if (viewModel.checkedItemDate.value == false && viewModel.checkedDaily.value == false) {
+                    binding.llStartTime.visibility = View.GONE
+                    binding.llEndTime.visibility = View.GONE
+                }
+            }
+            binding.llRemind.visibility = viewModel.remindVisibility(binding.llStartTime.visibility)
+        }
+        binding.cbEndDate.setOnClickListener {
+            if (viewModel.checkedRangeStart.value == true || viewModel.checkedRangeEnd.value == true) {
+                binding.llStartTime.visibility = View.VISIBLE
+                binding.llEndTime.visibility = View.VISIBLE
+            } else {
+                if (viewModel.checkedItemDate.value == false && viewModel.checkedDaily.value == false) {
+                    binding.llStartTime.visibility = View.GONE
+                    binding.llEndTime.visibility = View.GONE
+                }
+            }
+            binding.llRemind.visibility = viewModel.remindVisibility(binding.llStartTime.visibility)
         }
         val dateStartSetListener = DatePickerDialog.OnDateSetListener { datePicker, year, month, day ->
             viewModel.calStartDate.set(Calendar.DAY_OF_MONTH, day)
