@@ -19,20 +19,19 @@
         <CheckBox
             android:id="@+id/cbItemName"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:fontFamily="@font/poppins"
             android:maxWidth="150dp"
             android:text="Item"
             app:layout_constraintBottom_toTopOf="@+id/tvDescription"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
 
-        <!--TODO fix the ui here it looks bad-->
-
         <TextView
             android:id="@+id/tvTime"
-            android:layout_width="302dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/poppins"
             android:text="Time"
@@ -43,7 +42,7 @@
 
         <TextView
             android:id="@+id/tvRemind"
-            android:layout_width="302dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/poppins"
             android:text="Remind"
@@ -57,7 +56,7 @@
 
         <TextView
             android:id="@+id/tvDue"
-            android:layout_width="302dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/poppins"
             android:text="Due"
@@ -69,7 +68,7 @@
 
         <TextView
             android:id="@+id/tvDescription"
-            android:layout_width="360dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur scelerisque euismod velit et dignissim. Duis imperdiet bibendum semper. Pellentesque quis sodales enim. Nunc molestie neque et nibh feugiat ultricies. Phasellus augue metus, vestibulum quis gravida ornare, bibendum sed lacus. Aliquam erat volutpat. Suspendisse rutrum venenatis nunc. Curabitur vitae tincidunt orci. Suspendisse molestie blandit libero in luctus."
             android:visibility="visible"

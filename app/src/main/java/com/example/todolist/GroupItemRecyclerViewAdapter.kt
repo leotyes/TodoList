@@ -56,12 +56,16 @@ class GroupItemRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel,
         }
     }
 
-    fun deleteItem(itemPos: Int) {
-        viewModel.deleteItem(itemsAdapter[itemPos])
+    fun getItemAt(position: Int): ItemInfo {
+        return itemsAdapter[position]
     }
 
-    fun editItem(itemPos: Int) {
-        viewModel.editItemAppear(itemsAdapter[itemPos])
+    fun deleteItem(item: ItemInfo) {
+        viewModel.deleteItem(item)
+    }
+
+    fun editItem(item: ItemInfo) {
+        viewModel.editItemAppear(item)
     }
 
     fun isChecked(itemId: Long): Boolean {
@@ -82,6 +86,13 @@ class GroupItemRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel,
         holder.bind(itemsAdapter[position], checkedListener, expandedView,
             { itemId -> check(itemId) },
             { itemId -> isChecked(itemId) })
+    }
+
+    fun resetSwiped(position: Int) {
+        recyclerView?.post {
+            notifyItemChanged(position)
+            Log.i("Debug", "uh hello")
+        }
     }
 }
 

@@ -210,13 +210,11 @@ class HomeFragment : Fragment() {
             viewModel.visibleEditRemind.value = viewModel.remindVisibility(binding.llStartTime.visibility)
         }
         binding.btnItemDone.setOnClickListener {
-//            val result = viewModel.addItem()
-//            Toast.makeText(requireContext(), result, Toast.LENGTH_LONG).show()
+            val result = viewModel.editItemFinish()
+            Toast.makeText(requireContext(), result, Toast.LENGTH_LONG).show()
             binding.cvEditItem.visibility = View.GONE
             binding.view.visibility = View.GONE
-            viewModel.editItemFinish()
         }
-        // TODO change all binding to viewModel
         binding.cbDaily.setOnClickListener {
             if (viewModel.checkedEditDaily.value == true) {
                 viewModel.checkedEditWeekly.value = false

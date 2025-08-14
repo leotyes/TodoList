@@ -66,7 +66,6 @@ class AddItemFragmentViewModel(private val application: Application, private val
     val minDateInMillisEnd = MutableLiveData<Long>()
     val minDateInMillisDue = MutableLiveData<Long>()
     val minEndTime = MutableLiveData<Int>()
-    val checkedRange = MutableLiveData<Boolean>()
     val parentGroup = MutableLiveData<Long>()
     val calStartDate = Calendar.getInstance()
     val calDate = Calendar.getInstance()
@@ -232,9 +231,6 @@ class AddItemFragmentViewModel(private val application: Application, private val
                 tempCal.set(Calendar.MINUTE, 0)
                 tempCal.set(Calendar.HOUR_OF_DAY, 0)
                 if (tempCal.after(calStartDate)) return "Start Date Is Before Current Date"
-            }
-            if (checkedRange.value == true) {
-                if (!textRemind.value!!.isDigitsOnly()) return "Invalid Reminder Time"
             }
             if (checkedRemind.value == true) {
                 if (textRemind.value!!.isBlank() || textRemind.value == "") return "Reminder Time Cannot Be Blank"
@@ -540,9 +536,7 @@ class AddItemFragmentViewModel(private val application: Application, private val
                 // calEndDate //reset this one TODO
                 // calEndDate.add(Calendar.DAY_OF_YEAR, 1)
             }
-            return "Item added successfully"
-        } else {
-            return result
         }
+        return result
     }
 }

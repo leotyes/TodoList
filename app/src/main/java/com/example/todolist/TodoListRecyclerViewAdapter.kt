@@ -20,7 +20,6 @@ import com.example.todolist.db.ItemInfo
 
 class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, private val editListener: (GroupInfo) -> Unit, private val deleteListener: (GroupInfo) -> Unit, private val addListener: (GroupInfo) -> Unit, private val itemCheckedListener: (ItemInfo, Boolean) -> Unit,): RecyclerView.Adapter<TodoViewHolder>() {
     private val groupsAdapter = ArrayList<GroupInfo>()
-    private var expandedGroups = HashSet<Long>()
     private lateinit var parentContext: Context
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoViewHolder {
@@ -37,23 +36,28 @@ class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, 
     fun expand(groupId: Long) {
         val position = groupsAdapter.indexOfFirst { it.id == groupId }
         Log.i("Debug", "${groupsAdapter[position]}")
-        if (expandedGroups.contains(groupId)) {
-            expandedGroups.remove(groupId)
+        if (viewModel.expandedGroup.value == groupId) {
+            viewModel.expandedGroup.value = -1L
         } else {
-            expandedGroups.add(groupId)
+            val prevPosition = groupsAdapter.indexOfFirst { it.id == viewModel.expandedGroup.value }
+            viewModel.expandedGroup.value = groupId
+            if (viewModel.expandedGroup.value != -1L) {
+                notifyItemChanged(prevPosition)
+            }
         }
         notifyItemChanged(position)
     }
 
     fun isExpanded(groupId: Long): Boolean {
-        return expandedGroups.contains(groupId)
+        return (groupId == viewModel.expandedGroup.value)
     }
 
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
         holder.binding.rvItems.layoutManager = LinearLayoutManager(holder.itemView.context)
         holder.bind(groupsAdapter[position], editListener, deleteListener, addListener, itemCheckedListener,
             { groupId -> expand(groupId) },
-            { groupId -> isExpanded(groupId) })
+            { groupId -> isExpanded(groupId) },
+            { groupId -> getPosition(groupId) })
     }
 
     fun setList(list: List<GroupInfo>) {
@@ -61,16 +65,24 @@ class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, 
         groupsAdapter.clear()
         groupsAdapter.addAll(list)
     }
+
+    fun getPosition(groupId: Long): Int {
+        return groupsAdapter.indexOfFirst { it.id == groupId }
+    }
 }
 
 class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragmentViewModel): RecyclerView.ViewHolder(binding.root) {
-    fun bind(item: GroupInfo, editListener: (GroupInfo) -> Unit, deleteListener: (GroupInfo) -> Unit, addListener: (GroupInfo) -> Unit, itemCheckedListener: (ItemInfo, Boolean) -> Unit, expandClickedListener: (groupId: Long) -> Unit, expandCheck: (groupId: Long) -> Boolean) {
+    fun bind(item: GroupInfo, editListener: (GroupInfo) -> Unit, deleteListener: (GroupInfo) -> Unit, addListener: (GroupInfo) -> Unit, itemCheckedListener: (ItemInfo, Boolean) -> Unit, expandClickedListener: (groupId: Long) -> Unit, expandCheck: (groupId: Long) -> Boolean, getGroupPosition: (groupId: Long) -> Int) {
         val innerAdapter = GroupItemRecyclerViewAdapter(viewModel, itemCheckedListener)
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
             ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun isLongPressDragEnabled(): Boolean {
-                return true
+                return if (expandCheck(item.id)) {
+                    true
+                } else {
+                    false
+                }
             }
 
             override fun onChildDraw(
@@ -128,14 +140,20 @@ class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragme
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
+                val swipedItem = innerAdapter.getItemAt(position)
+                Log.i("Debug", "Swiped item: ${swipedItem.id} in group: ${item.id} at position: $position")
 
                 when (direction) {
                     ItemTouchHelper.LEFT -> {
-                        innerAdapter.deleteItem(position)
+                        innerAdapter.deleteItem(swipedItem)
                     }
                     ItemTouchHelper.RIGHT -> {
-                        innerAdapter.notifyItemChanged(position)
-                        innerAdapter.editItem(position)
+//                        innerAdapter.notifyItemChanged(position)
+                        innerAdapter.editItem(swipedItem)
+                        Log.i("Debug", "Resetting swiped item at position: $position")
+                        innerAdapter.resetSwiped(position)
+                        expandClickedListener(item.id)
+                        expandClickedListener(item.id)
                     }
                 }
             }
@@ -148,6 +166,7 @@ class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragme
         }
         val expanded = expandCheck(item.id)
         if (!expanded) {
+            Log.i("Debug", "Collapsed")
             binding.btnAdd.visibility = View.GONE
             binding.btnEditName.visibility = View.GONE
             binding.btnDeleteGroup.visibility = View.GONE
@@ -155,6 +174,7 @@ class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragme
             innerAdapter.expand(false)
             innerAdapter.notifyDataSetChanged()
         } else {
+            Log.i("Debug", "Expanded")
             binding.btnAdd.visibility = View.VISIBLE
             binding.btnEditName.visibility = View.VISIBLE
             binding.btnDeleteGroup.visibility = View.VISIBLE
