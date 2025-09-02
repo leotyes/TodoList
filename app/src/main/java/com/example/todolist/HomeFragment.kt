@@ -39,6 +39,61 @@ class HomeFragment : Fragment() {
     private lateinit var todoListRecyclerViewAdapter: TodoListRecyclerViewAdapter
     private lateinit var todoDao: TodoDao
     private lateinit var itemDao: ItemDao
+
+    private val notifPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted: Boolean ->
+        if (granted) {
+            Toast.makeText(requireContext(), "Notification permission granted", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(requireContext(), "Notification permission denied, notifications will not work", Toast.LENGTH_SHORT).show()
+        }
+
+        checkPermissionChain()
+    }
+    private val fineLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted: Boolean ->
+        if (granted) {
+            Toast.makeText(requireContext(), "Fine location permission granted", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(requireContext(), "Fine location permission denied, location notifications may not be accurate", Toast.LENGTH_SHORT).show()
+        }
+
+        checkPermissionChain()
+    }
+    private val coarseLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted: Boolean ->
+        if (granted) {
+            Toast.makeText(requireContext(), "Coarse location permission granted", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(requireContext(), "Coarse location permission denied, location notifications will not work", Toast.LENGTH_SHORT).show()
+        }
+
+        checkPermissionChain()
+    }
+    private val backgroundLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted: Boolean ->
+        if (granted) {
+            Toast.makeText(requireContext(), "Background location permission granted", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(requireContext(), "Background location permission denied, location notifications may not work", Toast.LENGTH_SHORT).show()
+        }
+
+        checkPermissionChain()
+    }
+
+    private fun checkPermissionChain() {
+        when {
+            ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED -> {
+                notifPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+            ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED -> {
+                coarseLocationPermissionLauncher.launch(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+            }
+            ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED -> {
+                fineLocationPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+            ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED -> {
+                backgroundLocationPermissionLauncher.launch(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -77,23 +132,7 @@ class HomeFragment : Fragment() {
             binding.cvEditName.visibility = View.GONE
             binding.view.visibility = View.GONE
         }
-        val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted: Boolean ->
-            if (granted) {
-                Toast.makeText(requireContext(), "Notification permission granted", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(requireContext(), "Notification permission denied, notifications will not work", Toast.LENGTH_SHORT).show()
-            }
-        }
-        when {
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED -> {
-            }
-            else -> {
-                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-            }
-
-        }
+        checkPermissionChain()
         todoListRecyclerViewAdapter = TodoListRecyclerViewAdapter(viewModel,
             {
                 selectedGroup: GroupInfo -> viewModel.editClicked(selectedGroup.id)
