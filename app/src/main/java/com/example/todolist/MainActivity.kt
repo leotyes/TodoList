@@ -7,6 +7,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.todolist.databinding.ActivityMainBinding
+import com.google.android.libraries.places.api.Places
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -19,5 +20,6 @@ class MainActivity : AppCompatActivity() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
         setContentView(binding.root)
+        Places.initialize(applicationContext, BuildConfig.PLACES_API_KEY)
     }
 }

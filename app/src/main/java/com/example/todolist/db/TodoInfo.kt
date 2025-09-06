@@ -36,7 +36,9 @@ data class ItemInfo(
     @ColumnInfo(name = "todo_checked")
     var checked: Boolean,
     @ColumnInfo(name = "todo_remind")
-    var remind: Int?
+    var remind: Int?,
+    @ColumnInfo(name = "todo_location_ids")
+    var locationIds: String?,
 )
 
 @Entity(tableName = "todo_data_table")

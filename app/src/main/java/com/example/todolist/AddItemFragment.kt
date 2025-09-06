@@ -26,6 +26,7 @@ class AddItemFragment : Fragment() {
     private lateinit var itemDao: ItemDao
     private lateinit var todoDao: TodoDao
     private lateinit var viewModel: AddItemFragmentViewModel
+    private lateinit var locationRemindManager: LocationRemindManager
     private val args: AddItemFragmentArgs by navArgs()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +44,17 @@ class AddItemFragment : Fragment() {
         binding.viewModel = viewModel
         viewModel.parentGroup.value = args.group
         binding.lifecycleOwner = viewLifecycleOwner
+        locationRemindManager = LocationRemindManager(requireContext(), binding.llLocationRemind, inflater, viewModel)
+        viewModel.visibleLocationHint.observe(viewLifecycleOwner) {
+            if (it) {
+                binding.tvLocationHint.visibility = View.VISIBLE
+            } else {
+                binding.tvLocationHint.visibility = View.GONE
+            }
+        }
+        binding.btnLocationRemind.setOnClickListener {
+            locationRemindManager.addItem()
+        }
         binding.btnTimeDue.setOnClickListener {
             val timeSetListener = TimePickerDialog.OnTimeSetListener { timePicker, hour, minute ->
                 viewModel.calDue.set(Calendar.HOUR_OF_DAY, hour)

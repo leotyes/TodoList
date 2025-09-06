@@ -345,6 +345,62 @@
 
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/llLocationRemindOptions"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <CheckBox
+                        android:id="@+id/cbLocationRemind"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.checkedLocation}"
+                        android:fontFamily="@font/poppins"
+                        android:singleLine="true"
+                        android:text="Location"
+                        android:textSize="18sp" />
+
+                    <ImageButton
+                        android:id="@+id/btnLocationRemind"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="#007A1818"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        app:srcCompat="@drawable/baseline_add_24" />
+
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/tvLocationHint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:fontFamily="@font/poppins"
+                        android:gravity="center"
+                        android:text="Locations here"
+                        android:textSize="24sp" />
+
+                    <ScrollView
+                        android:id="@+id/svLocationRemind"
+                        android:layout_width="match_parent"
+                        android:layout_height="150dp">
+
+                        <LinearLayout
+                            android:id="@+id/llLocationRemind"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" />
+                    </ScrollView>
+                </FrameLayout>
+
                 <Button
                     android:id="@+id/btnItemDone"
                     android:layout_width="match_parent"

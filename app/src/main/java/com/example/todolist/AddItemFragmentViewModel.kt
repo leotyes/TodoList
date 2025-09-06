@@ -38,6 +38,10 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.work.BackoffPolicy
 import com.example.todolist.workers.MonthlyNotificationWorker
 import com.example.todolist.workers.WeeklyNotificationWorker
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import java.time.DayOfWeek
 import kotlin.time.Duration
 
@@ -62,6 +66,8 @@ class AddItemFragmentViewModel(private val application: Application, private val
     val checkedWeekly = MutableLiveData<Boolean>()
     val checkedMonthly = MutableLiveData<Boolean>()
     val checkedRemind = MutableLiveData<Boolean>()
+    val checkedLocation = MutableLiveData<Boolean>()
+    val visibleLocationHint = MutableLiveData<Boolean>()
     val minDateInMillisStart = MutableLiveData<Long>()
     val minDateInMillisEnd = MutableLiveData<Long>()
     val minDateInMillisDue = MutableLiveData<Long>()
@@ -71,9 +77,12 @@ class AddItemFragmentViewModel(private val application: Application, private val
     val calDate = Calendar.getInstance()
     val calEndDate = Calendar.getInstance()
     val calDue = Calendar.getInstance()
+    val locationIds = MutableLiveData<List<String>>()
     private val dataStore = application.dataStore
     private lateinit var workManager: WorkManager
     lateinit var items: LiveData<List<ItemInfo>>
+    private val moshi = Moshi.Builder().build()
+    private val locationIdsJsonAdapter = moshi.adapter<List<String>>(Types.newParameterizedType(List::class.java, String::class.java))
 
     init {
         workManager = WorkManager.getInstance(application)
@@ -97,6 +106,9 @@ class AddItemFragmentViewModel(private val application: Application, private val
         checkedItemDate.value = false
         checkedItemStart.value = false
         checkedItemEnd.value = false
+        checkedLocation.value = false
+        visibleLocationHint.value = true
+        locationIds.value = listOf()
     }
 
     fun getGroupName(groupId: Long) {
@@ -275,6 +287,7 @@ class AddItemFragmentViewModel(private val application: Application, private val
     fun addItem() : String {
         val result = checkAdd()
         if (result == "Item added successfully") {
+            val locationIdsJson = locationIdsJsonAdapter.toJson(locationIds.value)
             var repeatType: Int?
             if (checkedDaily.value == true) {
                 repeatType = 1
@@ -303,9 +316,11 @@ class AddItemFragmentViewModel(private val application: Application, private val
                         if (checkedRangeEnd.value == true && (checkedDaily.value == true || checkedWeekly.value == true || checkedMonthly.value == true)) SimpleDateFormat("dd/MM/yyyy").parse(textDateEnd.value).time else null,
                         repeatType,
                         false,
-                        if (checkedRemind.value == true) textRemind.value!!.toInt() else null
+                        if (checkedRemind.value == true) textRemind.value!!.toInt() else null,
+                        if (checkedLocation.value == true && !locationIds.value!!.isEmpty()) locationIdsJson else null
                     )
                 )
+                locationIds.value = listOf()
                 if (checkedRemind.value == true) {
                     val groupName = todoDao.getGroupById(parentGroup.value!!).title
                     when (repeatType) {

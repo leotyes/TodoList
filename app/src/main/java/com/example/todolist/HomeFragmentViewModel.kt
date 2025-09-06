@@ -322,7 +322,9 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
                         if (checkedEditRangeEnd.value == true && (checkedEditDaily.value == true || checkedEditWeekly.value == true || checkedEditMonthly.value == true)) SimpleDateFormat("dd/MM/yyyy").parse(textEditDateEnd.value).time else null,
                         repeatType,
                         false,
-                        if (checkedEditRemind.value == true) textEditRemind.value!!.toInt() else null
+                        if (checkedEditRemind.value == true) textEditRemind.value!!.toInt() else null,
+                        null
+//                        TODO make the locations work for edit too
                     )
                 )
                 if (checkedEditRemind.value == true) {
@@ -653,7 +655,8 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
                     item.rangeEnd,
                     item.repeatType,
                     checked,
-                    item.remind
+                    item.remind,
+                    item.locationIds
                 )
             )
         }
