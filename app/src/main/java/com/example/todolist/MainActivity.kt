@@ -12,6 +12,7 @@ import com.google.android.libraries.places.api.Places
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainActivityViewModel
+    private val placesManager = PlacesManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -21,5 +22,6 @@ class MainActivity : AppCompatActivity() {
         binding.lifecycleOwner = this
         setContentView(binding.root)
         Places.initialize(applicationContext, BuildConfig.PLACES_API_KEY)
+        placesManager.getPlacesClient(applicationContext)
     }
 }

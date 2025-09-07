@@ -39,6 +39,7 @@ class HomeFragment : Fragment() {
     private lateinit var todoListRecyclerViewAdapter: TodoListRecyclerViewAdapter
     private lateinit var todoDao: TodoDao
     private lateinit var itemDao: ItemDao
+    private lateinit var locationRemindManager: EditLocationRemindManager
 
     private val notifPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted: Boolean ->
         if (granted) {
@@ -110,6 +111,24 @@ class HomeFragment : Fragment() {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
+        locationRemindManager = EditLocationRemindManager(requireContext(), binding.llLocationRemind, inflater, viewModel)
+        viewModel.locationRemindManager.value = locationRemindManager
+        viewModel.visibleLocationHint.observe(viewLifecycleOwner) {
+            if (it) {
+                binding.tvLocationHint.visibility = View.VISIBLE
+            } else {
+                binding.tvLocationHint.visibility = View.GONE
+            }
+        }
+        viewModel.toastText.observe(viewLifecycleOwner) {
+            if (it != "") {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                viewModel.toastText.value = ""
+            }
+        }
+        binding.btnLocationRemind.setOnClickListener {
+            locationRemindManager.addItem()
+        }
         binding.rvGroups.layoutManager = LinearLayoutManager(requireContext().applicationContext)
         viewModel.visibleEdit.observe(viewLifecycleOwner) {
             binding.cvEditItem.visibility = if (it) View.VISIBLE else View.GONE

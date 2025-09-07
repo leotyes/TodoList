@@ -33,6 +33,8 @@ import com.example.todolist.workers.DailyNotificationWorker
 import com.example.todolist.workers.MonthlyNotificationWorker
 import com.example.todolist.workers.SingleNotificationWorker
 import com.example.todolist.workers.WeeklyNotificationWorker
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
@@ -64,6 +66,7 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     val checkedEditWeekly = MutableLiveData<Boolean>()
     val checkedEditMonthly = MutableLiveData<Boolean>()
     val checkedEditRemind = MutableLiveData<Boolean>()
+    val checkedEditLocation = MutableLiveData<Boolean>()
     val minDateInMillisStart = MutableLiveData<Long>()
     val minDateInMillisEnd = MutableLiveData<Long>()
     val minDateInMillisDue = MutableLiveData<Long>()
@@ -78,8 +81,14 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     val calDue = Calendar.getInstance()
     val expandedGroup = MutableLiveData<Long>()
     val editingItem = MutableLiveData<ItemInfo?>()
+    val locationIds = MutableLiveData<List<List<Any>>>()
+    val visibleLocationHint = MutableLiveData<Boolean>()
+    val toastText = MutableLiveData<String>()
+    val locationRemindManager = MutableLiveData<EditLocationRemindManager>()
     private val dataStore = application.dataStore
     private lateinit var workManager: WorkManager
+    private val moshi = Moshi.Builder().build()
+    private val locationIdsJsonAdapter = moshi.adapter<List<List<Any>>>(Types.newParameterizedType(List::class.java, Types.newParameterizedType(List::class.java, Any::class.java)))
 
     init {
         workManager = WorkManager.getInstance(application)
@@ -95,6 +104,8 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
         minDateInMillisEnd.value = calEndDate.timeInMillis
         minDateInMillisDue.value = calDue.timeInMillis
         minEndTime.value = 0
+        checkedEditLocation.value = false
+        locationIds.value = listOf()
     }
 
     fun addGroup() {
@@ -235,6 +246,14 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
         if (item.remind != null) {
             textEditRemind.value = item.remind.toString()
         }
+        checkedEditLocation.value = if (item.locationIds != null) true else false
+        if (item.locationIds != null) {
+            val savedLocations = locationIdsJsonAdapter.fromJson(item.locationIds)
+            for (location in savedLocations!!) {
+                locationRemindManager.value!!.addSavedItem(location[0] as String, (location[1] as Double).toInt())
+            }
+            Log.d("Debugging", "$locationIds")
+        }
     }
 
     fun remindVisibility(vis: Int): Boolean {
@@ -247,7 +266,7 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     }
 
     fun checkEdit() : String {
-//        TODO fix this function it's bugging out
+//        TODO fix this function it's bugging out but it also works idk what's going on
         val tempCal = Calendar.getInstance()
         if (textEditName.value!! != "") {
             if (checkedEditDue.value == true) {
@@ -323,10 +342,11 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
                         repeatType,
                         false,
                         if (checkedEditRemind.value == true) textEditRemind.value!!.toInt() else null,
-                        null
-//                        TODO make the locations work for edit too
+                        if (checkedEditLocation.value == true && !locationIds.value!!.isEmpty()) locationIdsJsonAdapter.toJson(locationIds.value) else null
                     )
                 )
+                locationIds.value = listOf()
+                locationRemindManager.value!!.clearOnFinish()
                 if (checkedEditRemind.value == true) {
                     val groupName = todoDao.getGroupById(editingItem.value!!.group).title
                     when (repeatType) {

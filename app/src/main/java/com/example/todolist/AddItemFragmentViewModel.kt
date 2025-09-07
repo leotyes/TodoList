@@ -38,6 +38,10 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.work.BackoffPolicy
 import com.example.todolist.workers.MonthlyNotificationWorker
 import com.example.todolist.workers.WeeklyNotificationWorker
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.squareup.moshi.Moshi
@@ -73,19 +77,21 @@ class AddItemFragmentViewModel(private val application: Application, private val
     val minDateInMillisDue = MutableLiveData<Long>()
     val minEndTime = MutableLiveData<Int>()
     val parentGroup = MutableLiveData<Long>()
+    val toastText = MutableLiveData<String>()
     val calStartDate = Calendar.getInstance()
     val calDate = Calendar.getInstance()
     val calEndDate = Calendar.getInstance()
     val calDue = Calendar.getInstance()
-    val locationIds = MutableLiveData<List<String>>()
+    val locationIds = MutableLiveData<List<List<Any>>>()
     private val dataStore = application.dataStore
     private lateinit var workManager: WorkManager
     lateinit var items: LiveData<List<ItemInfo>>
     private val moshi = Moshi.Builder().build()
-    private val locationIdsJsonAdapter = moshi.adapter<List<String>>(Types.newParameterizedType(List::class.java, String::class.java))
+    private val locationIdsJsonAdapter = moshi.adapter<List<List<Any>>>(Types.newParameterizedType(List::class.java, Types.newParameterizedType(List::class.java, Any::class.java)))
 
     init {
         workManager = WorkManager.getInstance(application)
+        toastText.value = ""
         minDateInMillisStart.value = calStartDate.timeInMillis
         calEndDate.add(Calendar.DAY_OF_YEAR, 1)
         minDateInMillisEnd.value = calEndDate.timeInMillis
@@ -284,11 +290,37 @@ class AddItemFragmentViewModel(private val application: Application, private val
         }
     }
 
-    fun addItem() : String {
+    fun initializeGeofencing(itemId: Long): GeofencingRequest {
+        val geofenceList: MutableList<Geofence> = mutableListOf()
+        for (location in locationIds.value!!) {
+            geofenceList.add(Geofence.Builder()
+                .setRequestId(itemId.toString() + " " + location[0] as String)
+                .setCircularRegion(
+                    (location[2] as LatLng).latitude,
+                    (location[2] as LatLng).longitude,
+                    ((location[1] as Int) * 1000).toFloat()
+                )
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setLoiteringDelay(60000)
+                .build()
+            )
+        }
+        val geofencingRequest = GeofencingRequest.Builder()
+            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
+            .addGeofences(geofenceList)
+            .build()
+        locationIds.value = listOf()
+        checkedLocation.value = false
+        return geofencingRequest
+    }
+
+    fun addItem(): Pair<String, Long> {
         val result = checkAdd()
         if (result == "Item added successfully") {
             val locationIdsJson = locationIdsJsonAdapter.toJson(locationIds.value)
             var repeatType: Int?
+            var returnItemId: Long = -1
             if (checkedDaily.value == true) {
                 repeatType = 1
             } else if (checkedWeekly.value == true) {
@@ -320,7 +352,7 @@ class AddItemFragmentViewModel(private val application: Application, private val
                         if (checkedLocation.value == true && !locationIds.value!!.isEmpty()) locationIdsJson else null
                     )
                 )
-                locationIds.value = listOf()
+                returnItemId = itemId
                 if (checkedRemind.value == true) {
                     val groupName = todoDao.getGroupById(parentGroup.value!!).title
                     when (repeatType) {
@@ -551,7 +583,8 @@ class AddItemFragmentViewModel(private val application: Application, private val
                 // calEndDate //reset this one TODO
                 // calEndDate.add(Calendar.DAY_OF_YEAR, 1)
             }
+            return Pair(result, returnItemId)
         }
-        return result
+        return Pair(result, -1)
     }
 }

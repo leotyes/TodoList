@@ -1,6 +1,5 @@
 package com.example.todolist
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
@@ -12,24 +11,20 @@ import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ScrollView
-import androidx.annotation.RequiresPermission
 import androidx.core.text.isDigitsOnly
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.FragmentActivity
 import com.example.todolist.databinding.LocationRemindItemBinding
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 
-class LocationRemindManager(private val context: Context, private val container: LinearLayout, private val layoutInflater: LayoutInflater, private val viewModel: AddItemFragmentViewModel) {
-    private val items = mutableListOf<LocationRemindItem>()
+class EditLocationRemindManager(private val context: Context, private val container: LinearLayout, private val layoutInflater: LayoutInflater, private val viewModel: HomeFragmentViewModel) {
+    private val items = mutableListOf<EditLocationRemindItem>()
     private val locationIds = mutableMapOf<Int, List<Any>>()
     private var nextId = 1000
 
@@ -44,18 +39,37 @@ class LocationRemindManager(private val context: Context, private val container:
         nextId++
         container.addView(binding.root)
 
-        val item = LocationRemindItem(binding, this, context, nextId)
+        val item = EditLocationRemindItem(binding, this, context, nextId)
 
         items.add(item)
     }
 
-    fun removeItem(item: LocationRemindItem) {
+    fun addSavedItem(placeId: String, radius: Int) {
+        val binding = LocationRemindItemBinding.inflate(layoutInflater, container, false)
+        viewModel.visibleLocationHint.value = false
+        nextId++
+        container.addView(binding.root)
+
+        val item = EditLocationRemindItem(binding, this, context, nextId)
+        item.setSavedLocation(placeId, radius)
+
+        items.add(item)
+    }
+
+    fun removeItem(item: EditLocationRemindItem) {
         container.removeView(item.binding.root)
         items.remove(item)
         locationIds.remove(item.nextId)
         viewModel.locationIds.value = locationIds.values.toList()
         if (items.isEmpty()) {
             viewModel.visibleLocationHint.value = true
+        }
+    }
+
+    fun editRadius(id: Int, radius: Int) {
+        if (locationIds.containsKey(id)) {
+            locationIds[id] = listOf(locationIds[id]!![0], radius)
+            viewModel.locationIds.value = locationIds.values.toList()
         }
     }
 
@@ -71,26 +85,32 @@ class LocationRemindManager(private val context: Context, private val container:
         Log.d("Debugging", "locationIds: $locationIds")
     }
 
-    fun editRadius(id: Int, radius: Int) {
-        if (locationIds.containsKey(id)) {
-            locationIds[id] = listOf(locationIds[id]!![0], radius)
-            viewModel.locationIds.value = locationIds.values.toList()
-        }
-    }
-
     fun removeLocationId(id: Int) {
         if (locationIds.containsKey(id)) {
             locationIds.remove(id)
         }
     }
+
+    fun clearOnFinish() {
+        for (item in items) {
+            container.removeView(item.binding.root)
+        }
+        viewModel.visibleLocationHint.value = true
+        viewModel.locationIds.value = listOf()
+        items.clear()
+        locationIds.clear()
+        nextId = 1000
+    }
 }
 
 @SuppressLint("MissingPermission")
-class LocationRemindItem(val binding: LocationRemindItemBinding, private val manager: LocationRemindManager, private val context: Context, val nextId: Int) {
+class EditLocationRemindItem(val binding: LocationRemindItemBinding, private val manager: EditLocationRemindManager, private val context: Context, val nextId: Int) {
+    val autocompleteFragment = AutocompleteSupportFragment.newInstance()
+
     init {
         Log.d("Debugging", "nextId: $nextId")
         binding.autocompleteSupportFragment.id = nextId
-        val autocompleteFragment = AutocompleteSupportFragment.newInstance()
+
 
         val activity = context as FragmentActivity
         activity.supportFragmentManager.beginTransaction().replace(binding.autocompleteSupportFragment.id, autocompleteFragment).commitNow()
@@ -113,9 +133,9 @@ class LocationRemindItem(val binding: LocationRemindItemBinding, private val man
                 override fun onPlaceSelected(place: Place) {
                     manager.removeLocationId(nextId)
                     if (binding.etRadius.text.toString().isDigitsOnly() && binding.etRadius.text.toString().isNotEmpty()) {
-                        place.id?.let { manager.addLocationId(nextId, it, binding.etRadius.text.toString().toInt(), place.location!!) }
+                        place.id?.let { manager.addLocationId(nextId, it, binding.etRadius.text.toString().toInt(), place.location) }
                     } else {
-                        place.id?.let { manager.addLocationId(nextId, it, 1, place.location!!) }
+                        place.id?.let { manager.addLocationId(nextId, it, 1, place.location) }
                     }
                 }
 
@@ -147,5 +167,20 @@ class LocationRemindItem(val binding: LocationRemindItemBinding, private val man
                 }
             }
         })
+    }
+
+    fun setSavedLocation(placeId: String, radius: Int) {
+        autocompleteFragment.view?.findViewById<ImageView>(com.google.android.libraries.places.R.id.places_autocomplete_clear_button)?.visibility = View.VISIBLE
+
+        val placesClient = PlacesManager.getPlacesClient(context)
+        val request = FetchPlaceRequest.newInstance(placeId, listOf(Place.Field.ID, Place.Field.LOCATION, Place.Field.DISPLAY_NAME, Place.Field.FORMATTED_ADDRESS))
+
+        placesClient.fetchPlace(request).addOnSuccessListener {
+            val place = it.place
+            autocompleteFragment.view?.findViewById<EditText>(com.google.android.libraries.places.R.id.places_autocomplete_search_input)?.setText(place.displayName)
+            manager.addLocationId(nextId, placeId, radius, place.location)
+        }
+
+        binding.etRadius.setText(radius.toString())
     }
 }

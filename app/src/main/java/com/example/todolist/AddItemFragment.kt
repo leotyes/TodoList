@@ -1,8 +1,12 @@
 package com.example.todolist
 
+import android.Manifest
 import android.app.AlertDialog
 import android.app.DatePickerDialog
+import android.app.PendingIntent
 import android.app.TimePickerDialog
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.util.Log
@@ -11,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -18,6 +23,8 @@ import com.example.todolist.databinding.FragmentAddItemBinding
 import com.example.todolist.db.ItemDao
 import com.example.todolist.db.TodoDao
 import com.example.todolist.db.TodoDatabase
+import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.LocationServices
 import java.text.SimpleDateFormat
 import kotlin.math.min
 
@@ -27,6 +34,7 @@ class AddItemFragment : Fragment() {
     private lateinit var todoDao: TodoDao
     private lateinit var viewModel: AddItemFragmentViewModel
     private lateinit var locationRemindManager: LocationRemindManager
+    private lateinit var geofencingClient: GeofencingClient
     private val args: AddItemFragmentArgs by navArgs()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +42,7 @@ class AddItemFragment : Fragment() {
         todoDao = TodoDatabase.getInstance(requireContext().applicationContext).todoDao
         val factory = AddItemViewModelFactory(requireActivity().application, itemDao, todoDao)
         viewModel = ViewModelProvider(this, factory).get(AddItemFragmentViewModel(requireActivity().application, itemDao, todoDao)::class.java)
+        geofencingClient = LocationServices.getGeofencingClient(requireActivity())
     }
 
     override fun onCreateView(
@@ -50,6 +59,12 @@ class AddItemFragment : Fragment() {
                 binding.tvLocationHint.visibility = View.VISIBLE
             } else {
                 binding.tvLocationHint.visibility = View.GONE
+            }
+        }
+        viewModel.toastText.observe(viewLifecycleOwner) {
+            if (it != "") {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                viewModel.toastText.value = ""
             }
         }
         binding.btnLocationRemind.setOnClickListener {
@@ -128,10 +143,27 @@ class AddItemFragment : Fragment() {
         }
         binding.btnItemDone.setOnClickListener {
             val result = viewModel.addItem()
-            if (result == "Item added successfully") {
+            if (result.first == "Item added successfully") {
+                if (viewModel.checkedLocation.value == true) {
+                    val geofencingRequest = viewModel.initializeGeofencing(result.second)
+                    val geofencePendingIntent: PendingIntent by lazy {
+                        val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
+                        PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                    }
+                    if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
+                            addOnSuccessListener {
+
+                            }
+                            addOnFailureListener {
+
+                            }
+                        }
+                    }
+                }
                 findNavController().navigate(R.id.action_addItemFragment_to_homeFragment)
             }
-            Toast.makeText(requireContext(), result, Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), result.first, Toast.LENGTH_LONG).show()
         }
         binding.cbDaily.setOnClickListener {
             if (viewModel.checkedDaily.value == true) {

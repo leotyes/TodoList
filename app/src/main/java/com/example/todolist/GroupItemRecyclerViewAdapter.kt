@@ -11,6 +11,8 @@ import androidx.work.WorkManager
 import com.example.todolist.databinding.GroupListItemBinding
 import com.example.todolist.db.GroupInfo
 import com.example.todolist.db.ItemInfo
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 
@@ -101,6 +103,14 @@ class ItemViewHolder(val binding: GroupListItemBinding, val viewModel: HomeFragm
         var repeatType = ""
         var repeatRange = ""
         var repeatTime = ""
+        if (item.locationIds != null) {
+            val moshi = Moshi.Builder().build()
+            val locationIdsJsonAdapter = moshi.adapter<List<List<Any>>>(Types.newParameterizedType(List::class.java, Types.newParameterizedType(List::class.java, Any::class.java)))
+            val locationIds = locationIdsJsonAdapter.fromJson(item.locationIds!!)
+            binding.tvLocation.text = "${locationIds!!.size} location${if (locationIds!!.size > 1) "s" else ""}"
+        } else {
+            binding.tvLocation.text = "No locations"
+        }
         if (item.date == null) {
             if (item.repeatType != null) {
                 if (item.repeatType == 1) {
