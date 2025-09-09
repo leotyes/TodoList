@@ -33,6 +33,9 @@ import com.example.todolist.workers.DailyNotificationWorker
 import com.example.todolist.workers.MonthlyNotificationWorker
 import com.example.todolist.workers.SingleNotificationWorker
 import com.example.todolist.workers.WeeklyNotificationWorker
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingRequest
+import com.google.android.gms.maps.model.LatLng
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import kotlinx.coroutines.launch
@@ -265,7 +268,7 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
         if (min(v1, v2) == 0) return false else return true
     }
 
-    fun checkEdit() : String {
+    fun checkEdit(): String {
 //        TODO fix this function it's bugging out but it also works idk what's going on
         val tempCal = Calendar.getInstance()
         if (textEditName.value!! != "") {
@@ -310,6 +313,33 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
         }
     }
 
+    fun reinitializeGeofencing(): GeofencingRequest {
+        val geofenceList: MutableList<Geofence> = mutableListOf()
+        for (location in locationIds.value!!) {
+            geofenceList.add(
+                Geofence.Builder()
+                .setRequestId(editingItem.value!!.id.toString() + " " + location[0] as String)
+                .setCircularRegion(
+                    (location[2] as LatLng).latitude,
+                    (location[2] as LatLng).longitude,
+                    ((location[1] as Int) * 1000).toFloat()
+                )
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setLoiteringDelay(60000)
+                .build()
+            )
+        }
+        val geofencingRequest = GeofencingRequest.Builder()
+            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
+            .addGeofences(geofenceList)
+            .build()
+        locationIds.value = listOf()
+        locationRemindManager.value!!.clearOnFinish()
+        checkedEditLocation.value = false
+        return geofencingRequest
+    }
+
     fun editItemFinish(): String {
         val result = checkEdit()
         visibleEdit.value = false
@@ -345,8 +375,6 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
                         if (checkedEditLocation.value == true && !locationIds.value!!.isEmpty()) locationIdsJsonAdapter.toJson(locationIds.value) else null
                     )
                 )
-                locationIds.value = listOf()
-                locationRemindManager.value!!.clearOnFinish()
                 if (checkedEditRemind.value == true) {
                     val groupName = todoDao.getGroupById(editingItem.value!!.group).title
                     when (repeatType) {

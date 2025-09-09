@@ -17,15 +17,24 @@ import com.example.todolist.databinding.GroupListItemBinding
 import com.example.todolist.databinding.TodoListItemBinding
 import com.example.todolist.db.GroupInfo
 import com.example.todolist.db.ItemInfo
+import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.LocationServices
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 
 class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, private val editListener: (GroupInfo) -> Unit, private val deleteListener: (GroupInfo) -> Unit, private val addListener: (GroupInfo) -> Unit, private val itemCheckedListener: (ItemInfo, Boolean) -> Unit,): RecyclerView.Adapter<TodoViewHolder>() {
     private val groupsAdapter = ArrayList<GroupInfo>()
     private lateinit var parentContext: Context
+    private val moshi = Moshi.Builder().build()
+    private val locationIdsJsonAdapter = moshi.adapter<List<List<Any>>>(Types.newParameterizedType(List::class.java, Types.newParameterizedType(List::class.java, Any::class.java)))
+    private lateinit var geofencingClient: GeofencingClient
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         val itemBinding = TodoListItemBinding.inflate(layoutInflater, parent, false)
         parentContext = parent.context
+        geofencingClient = LocationServices.getGeofencingClient(parentContext)
         return TodoViewHolder(itemBinding, viewModel)
     }
 
@@ -57,7 +66,9 @@ class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, 
         holder.bind(groupsAdapter[position], editListener, deleteListener, addListener, itemCheckedListener,
             { groupId -> expand(groupId) },
             { groupId -> isExpanded(groupId) },
-            { groupId -> getPosition(groupId) })
+            { groupId -> getPosition(groupId) },
+            locationIdsJsonAdapter,
+            geofencingClient)
     }
 
     fun setList(list: List<GroupInfo>) {
@@ -72,7 +83,7 @@ class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, 
 }
 
 class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragmentViewModel): RecyclerView.ViewHolder(binding.root) {
-    fun bind(item: GroupInfo, editListener: (GroupInfo) -> Unit, deleteListener: (GroupInfo) -> Unit, addListener: (GroupInfo) -> Unit, itemCheckedListener: (ItemInfo, Boolean) -> Unit, expandClickedListener: (groupId: Long) -> Unit, expandCheck: (groupId: Long) -> Boolean, getGroupPosition: (groupId: Long) -> Int) {
+    fun bind(item: GroupInfo, editListener: (GroupInfo) -> Unit, deleteListener: (GroupInfo) -> Unit, addListener: (GroupInfo) -> Unit, itemCheckedListener: (ItemInfo, Boolean) -> Unit, expandClickedListener: (groupId: Long) -> Unit, expandCheck: (groupId: Long) -> Boolean, getGroupPosition: (groupId: Long) -> Int, locationIdsJsonAdapter: JsonAdapter<List<List<Any>>>, geofencingClient: GeofencingClient) {
         val innerAdapter = GroupItemRecyclerViewAdapter(viewModel, itemCheckedListener)
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
@@ -146,6 +157,14 @@ class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragme
                 when (direction) {
                     ItemTouchHelper.LEFT -> {
                         innerAdapter.deleteItem(swipedItem)
+                        if (!swipedItem.locationIds.isNullOrEmpty() && !swipedItem.locationIds.isNullOrBlank()) {
+                            val locationIds = locationIdsJsonAdapter.fromJson(swipedItem.locationIds)
+                            val removeList = mutableListOf<String>()
+                            for (location in locationIds!!) {
+                                removeList.add("${swipedItem.id} ${location[0]}")
+                            }
+                            geofencingClient.removeGeofences(removeList)
+                        }
                     }
                     ItemTouchHelper.RIGHT -> {
 //                        innerAdapter.notifyItemChanged(position)

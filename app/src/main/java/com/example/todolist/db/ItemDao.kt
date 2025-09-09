@@ -20,6 +20,9 @@ interface ItemDao {
     @Delete
     suspend fun deleteItem(item: ItemInfo)
 
+    @Query("SELECT * FROM item_data_table where todo_id = :itemId")
+    suspend fun getItem(itemId: Long): ItemInfo
+
     @Query("SELECT * FROM item_data_table")
     fun getItems(): LiveData<List<ItemInfo>>
 

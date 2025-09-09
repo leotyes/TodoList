@@ -1,10 +1,13 @@
 package com.example.todolist
 
+import android.Manifest
 import android.app.DatePickerDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.icu.util.Calendar
 import android.os.Build
@@ -16,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
@@ -30,6 +34,10 @@ import com.example.todolist.db.ItemDao
 import com.example.todolist.db.ItemInfo
 import com.example.todolist.db.TodoDao
 import com.example.todolist.db.TodoDatabase
+import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.LocationServices
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import java.text.SimpleDateFormat
 import kotlin.math.abs
 
@@ -40,6 +48,9 @@ class HomeFragment : Fragment() {
     private lateinit var todoDao: TodoDao
     private lateinit var itemDao: ItemDao
     private lateinit var locationRemindManager: EditLocationRemindManager
+    private lateinit var geofencingClient: GeofencingClient
+    val moshi = Moshi.Builder().build()
+    val locationIdsJsonAdapter = moshi.adapter<List<List<Any>>>(Types.newParameterizedType(List::class.java, Types.newParameterizedType(List::class.java, Any::class.java)))
 
     private val notifPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted: Boolean ->
         if (granted) {
@@ -102,6 +113,7 @@ class HomeFragment : Fragment() {
         itemDao = TodoDatabase.getInstance(requireContext().applicationContext).itemDao
         val factory = HomeViewModelFactory(todoDao, itemDao, requireActivity().application)
         viewModel = ViewModelProvider(this, factory).get(HomeFragmentViewModel(todoDao, itemDao, requireActivity().application)::class.java)
+        geofencingClient = LocationServices.getGeofencingClient(requireActivity())
     }
 
     override fun onCreateView(
@@ -269,6 +281,32 @@ class HomeFragment : Fragment() {
         }
         binding.btnItemDone.setOnClickListener {
             val result = viewModel.editItemFinish()
+            if (viewModel.checkedEditLocation.value == true && result == "Item edited successfully") {
+                val editingItem = viewModel.editingItem.value!!
+                if (!editingItem.locationIds.isNullOrBlank() && !editingItem.locationIds.isNullOrEmpty()) {
+                    val locationIds = locationIdsJsonAdapter.fromJson(editingItem.locationIds)
+                    val removeList = mutableListOf<String>()
+                    for (location in locationIds!!) {
+                        removeList.add("${editingItem.id} ${location[0]}")
+                    }
+                    geofencingClient.removeGeofences(removeList)
+                }
+                val geofencingRequest = viewModel.reinitializeGeofencing()
+                val geofencePendingIntent: PendingIntent by lazy {
+                    val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
+                    PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                }
+                if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
+                        addOnSuccessListener {
+
+                        }
+                        addOnFailureListener {
+
+                        }
+                    }
+                }
+            }
             Toast.makeText(requireContext(), result, Toast.LENGTH_LONG).show()
             binding.cvEditItem.visibility = View.GONE
             binding.view.visibility = View.GONE

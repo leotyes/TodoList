@@ -28,7 +28,6 @@ import androidx.work.workDataOf
 import com.example.todolist.DataStoreManager.dataStore
 import com.example.todolist.R
 import com.example.todolist.workers.DailyNotificationWorker.Companion
-import com.example.todolist.workers.DaySummaryNotificationWorker.Companion.TODO_ITEM
 import com.example.todolist.workers.SingleNotificationWorker.Companion.GROUP_NAME
 import com.example.todolist.workers.SingleNotificationWorker.Companion.TODO_DESCRIPTION
 import com.example.todolist.workers.SingleNotificationWorker.Companion.TODO_ID
@@ -268,16 +267,5 @@ class SingleNotificationWorker(private val appContext: Context, private val work
         const val TODO_REMIND = "TODO_REMIND"
         const val TODO_DESCRIPTION = "TODO_DESCRIPTION"
         const val TODO_ID = "TODO_ID"
-    }
-}
-
-class DaySummaryNotificationWorker(private val appContext: Context, private val workerParams: WorkerParameters) : Worker(appContext, workerParams) {
-    override fun doWork(): Result {
-        val group = workerParams.inputData.getString(TODO_ITEM)
-        return Result.success()
-    }
-
-    companion object {
-        const val TODO_ITEM = "TODO_ITEM"
     }
 }
