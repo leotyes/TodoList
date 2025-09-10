@@ -12,6 +12,8 @@ import android.content.pm.PackageManager
 import android.icu.util.Calendar
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -124,6 +126,14 @@ class HomeFragment : Fragment() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
         locationRemindManager = EditLocationRemindManager(requireContext(), binding.llLocationRemind, inflater, viewModel)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // API 23+
+            val powerManager = requireContext().getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!powerManager.isIgnoringBatteryOptimizations(requireContext().packageName)) {
+                Toast.makeText(requireContext(), "Please disable battery optimizations for this app to ensure reminders work properly", Toast.LENGTH_LONG).show()
+                val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                startActivity(intent)
+            }
+        }
         viewModel.locationRemindManager.value = locationRemindManager
         viewModel.visibleLocationHint.observe(viewLifecycleOwner) {
             if (it) {
@@ -162,6 +172,9 @@ class HomeFragment : Fragment() {
             viewModel.visibleEdit.value = false
             binding.cvEditName.visibility = View.GONE
             binding.view.visibility = View.GONE
+            viewModel.locationIds.value = listOf()
+            locationRemindManager.clearOnFinish()
+            viewModel.checkedEditLocation.value = false
         }
         checkPermissionChain()
         todoListRecyclerViewAdapter = TodoListRecyclerViewAdapter(viewModel,
@@ -291,18 +304,20 @@ class HomeFragment : Fragment() {
                     }
                     geofencingClient.removeGeofences(removeList)
                 }
-                val geofencingRequest = viewModel.reinitializeGeofencing()
-                val geofencePendingIntent: PendingIntent by lazy {
-                    val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
-                    PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-                }
-                if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
-                        addOnSuccessListener {
-
-                        }
-                        addOnFailureListener {
-
+                if (viewModel.locationIds.value!! != listOf<Any>()) {
+                    val geofencingRequest = viewModel.reinitializeGeofencing()
+                    val geofencePendingIntent: PendingIntent by lazy {
+                        val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
+                        PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+                    }
+                    if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
+                            addOnSuccessListener {
+                                Log.d("Debugging", "Geofences added")
+                            }
+                            addOnFailureListener {
+                                Log.d("Debugging", "Geofences not added")
+                            }
                         }
                     }
                 }

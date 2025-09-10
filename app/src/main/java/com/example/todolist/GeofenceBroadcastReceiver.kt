@@ -23,24 +23,26 @@ import kotlinx.coroutines.tasks.await
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val pendingResult = goAsync()
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
         if (geofencingEvent!!.hasError()) {
             return
         }
 
+        val pendingResult = goAsync()
         val itemDao = TodoDatabase.getInstance(context).itemDao
         val todoDao = TodoDatabase.getInstance(context).todoDao
         val geofenceTransition = geofencingEvent.geofenceTransition
         val placesClient = PlacesManager.getPlacesClient(context)
 
-        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
+        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL || geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             val triggeringGeofences = geofencingEvent.triggeringGeofences
             if (triggeringGeofences == null) return
             for (geofence in triggeringGeofences) {
+                Log.d("Debugging", "Geofence triggered somewhere")
                 try {
                     CoroutineScope(Dispatchers.IO).launch {
                         try {
+                            Log.d("Debugging", "Geofence triggered: ${geofence.requestId}")
                             val itemId = geofence.requestId.split(" ")[0].toLong()
                             val placeId = geofence.requestId.split(" ")[1]
                             val item = itemDao.getItem(itemId)

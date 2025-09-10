@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.todolist.databinding.FragmentAddItemBinding
@@ -25,6 +26,7 @@ import com.example.todolist.db.TodoDao
 import com.example.todolist.db.TodoDatabase
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import kotlin.math.min
 
@@ -36,6 +38,10 @@ class AddItemFragment : Fragment() {
     private lateinit var locationRemindManager: LocationRemindManager
     private lateinit var geofencingClient: GeofencingClient
     private val args: AddItemFragmentArgs by navArgs()
+    private val geofencePendingIntent: PendingIntent by lazy {
+        val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
+        PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         itemDao = TodoDatabase.getInstance(requireContext().applicationContext).itemDao
@@ -142,28 +148,26 @@ class AddItemFragment : Fragment() {
             }
         }
         binding.btnItemDone.setOnClickListener {
-            val result = viewModel.addItem()
-            if (result.first == "Item added successfully") {
-                if (viewModel.checkedLocation.value == true) {
-                    val geofencingRequest = viewModel.initializeGeofencing(result.second)
-                    val geofencePendingIntent: PendingIntent by lazy {
-                        val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
-                        PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-                    }
-                    if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
-                            addOnSuccessListener {
-
-                            }
-                            addOnFailureListener {
-
+            lifecycleScope.launch {
+                val result = viewModel.addItem()
+                if (result.first == "Item added successfully") {
+                    if (viewModel.checkedLocation.value == true) {
+                        val geofencingRequest = viewModel.initializeGeofencing(result.second)
+                        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                            geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
+                                addOnSuccessListener {
+                                    Log.d("Debugging", "Geofences added")
+                                }
+                                addOnFailureListener {
+                                    Log.d("Debugging", "Geofences not added")
+                                }
                             }
                         }
                     }
+                    findNavController().navigate(R.id.action_addItemFragment_to_homeFragment)
                 }
-                findNavController().navigate(R.id.action_addItemFragment_to_homeFragment)
+                Toast.makeText(requireContext(), result.first, Toast.LENGTH_LONG).show()
             }
-            Toast.makeText(requireContext(), result.first, Toast.LENGTH_LONG).show()
         }
         binding.cbDaily.setOnClickListener {
             if (viewModel.checkedDaily.value == true) {

@@ -73,7 +73,7 @@ class LocationRemindManager(private val context: Context, private val container:
 
     fun editRadius(id: Int, radius: Int) {
         if (locationIds.containsKey(id)) {
-            locationIds[id] = listOf(locationIds[id]!![0], radius)
+            locationIds[id] = listOf(locationIds[id]!![0], radius, locationIds[id]!![2])
             viewModel.locationIds.value = locationIds.values.toList()
         }
     }
