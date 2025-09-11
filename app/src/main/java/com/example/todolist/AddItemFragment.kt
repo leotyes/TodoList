@@ -39,8 +39,8 @@ class AddItemFragment : Fragment() {
     private lateinit var geofencingClient: GeofencingClient
     private val args: AddItemFragmentArgs by navArgs()
     private val geofencePendingIntent: PendingIntent by lazy {
-        val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
-        PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+        val intent = Intent(requireContext().applicationContext, GeofenceBroadcastReceiver::class.java)
+        PendingIntent.getBroadcast(requireContext().applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -16,6 +16,8 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -50,12 +52,16 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                             val request = FetchPlaceRequest.newInstance(placeId, listOf(Place.Field.ID, Place.Field.LOCATION, Place.Field.DISPLAY_NAME, Place.Field.FORMATTED_ADDRESS))
                             val response = placesClient.fetchPlace(request).await()
                             val place = response.place
+                            val moshi = Moshi.Builder().build()
+                            val locationIdsJsonAdapter = moshi.adapter<List<List<Any>>>(Types.newParameterizedType(List::class.java, Types.newParameterizedType(List::class.java, Any::class.java)))
+                            val locationRadius = locationIdsJsonAdapter.fromJson(item.locationIds)?.first { it[0] == placeId }?.get(1) as Int
                             val builder = NotificationCompat.Builder(context, "notification_channel")
                                 .setSmallIcon(R.drawable.baseline_keyboard_arrow_up_24)
                                 .setContentTitle("${item.name} at ${place.formattedAddress}")
+                                .setContentText("$locationRadius km away")
                                 .setStyle(
                                     NotificationCompat.BigTextStyle()
-                                        .setBigContentTitle("${item.name} at ${place.formattedAddress} in group ${group.title}")
+                                        .setBigContentTitle("${item.name} at ${place.displayName} in group ${group.title}")
                                         .bigText(item.description))
                                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                             with(NotificationManagerCompat.from(context)) {

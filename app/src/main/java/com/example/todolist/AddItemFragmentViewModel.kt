@@ -303,7 +303,7 @@ class AddItemFragmentViewModel(private val application: Application, private val
                 )
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL or Geofence.GEOFENCE_TRANSITION_ENTER)
-                .setLoiteringDelay(60000)
+                .setLoiteringDelay(10000)
                 .build()
             )
         }

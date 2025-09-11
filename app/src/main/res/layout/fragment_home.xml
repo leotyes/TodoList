@@ -55,6 +55,39 @@
                         android:paddingEnd="15dp"
                         android:paddingBottom="15dp">
 
+                        <LinearLayout
+                            android:id="@+id/llGroup"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:visibility="visible">
+
+                            <TextView
+                                android:id="@+id/tvGroupInfo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/poppins"
+                                android:gravity="center_vertical"
+                                android:text="Parent Group"
+                                android:textSize="16sp" />
+
+                            <Button
+                                android:id="@+id/btnGroup"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="75dp"
+                                android:layout_marginEnd="0dp"
+                                android:layout_weight="1"
+                                android:elevation="4dp"
+                                android:fontFamily="@font/poppins"
+                                android:maxLines="1"
+                                android:text="@={viewModel.textEditParentGroup}"
+                                android:textColor="#FFFFFF"
+                                app:cornerRadius="15dp" />
+
+                        </LinearLayout>
+
                         <EditText
                             android:id="@+id/etItemName"
                             android:layout_width="match_parent"

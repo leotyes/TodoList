@@ -59,6 +59,7 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     val textEditDateStart = MutableLiveData<String>()
     val textEditDateEnd = MutableLiveData<String>()
     val textEditRemind = MutableLiveData<String>()
+    val textEditParentGroup = MutableLiveData<String>()
     val checkedEditDue = MutableLiveData<Boolean>()
     val checkedEditItemDate = MutableLiveData<Boolean>()
     val checkedEditItemStart = MutableLiveData<Boolean>()
@@ -158,6 +159,9 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
         minDateInMillisStart.value = calStartDate.timeInMillis
         textEditName.value = item.name
         textEditDescription.value = if (item.description != null) item.description else ""
+        viewModelScope.launch {
+            textEditParentGroup.value = todoDao.getGroupById(item.group).title
+        }
         visibleEditTimes.value = false
         if (item.dueTime != null) {
             checkedEditDue.value = true
@@ -326,12 +330,12 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
                 )
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
-                .setLoiteringDelay(60000)
+                .setLoiteringDelay(10000)
                 .build()
             )
         }
         val geofencingRequest = GeofencingRequest.Builder()
-            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
+            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL or GeofencingRequest.INITIAL_TRIGGER_ENTER)
             .addGeofences(geofenceList)
             .build()
         locationIds.value = listOf()

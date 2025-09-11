@@ -1,6 +1,7 @@
 package com.example.todolist
 
 import android.Manifest
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -325,6 +326,16 @@ class HomeFragment : Fragment() {
             Toast.makeText(requireContext(), result, Toast.LENGTH_LONG).show()
             binding.cvEditItem.visibility = View.GONE
             binding.view.visibility = View.GONE
+        }
+        binding.btnGroup.setOnClickListener {
+            val titleList = viewModel.groups.value!!.map { it.title }.toTypedArray()
+            AlertDialog.Builder(requireContext())
+                .setTitle("Choose Group")
+                .setNegativeButton("Cancel", null)
+                .setItems(titleList) { dialog, which ->
+                    val selected = titleList[which]
+                }
+                .show()
         }
         binding.cbDaily.setOnClickListener {
             if (viewModel.checkedEditDaily.value == true) {
