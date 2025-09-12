@@ -75,6 +75,7 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     val minDateInMillisEnd = MutableLiveData<Long>()
     val minDateInMillisDue = MutableLiveData<Long>()
     val minEndTime = MutableLiveData<Int>()
+    val selectedGroupId = MutableLiveData<Long>()
     val visibleEditRanges = MutableLiveData<Boolean>()
     val visibleEditTimes = MutableLiveData<Boolean>()
     val visibleEditRemind = MutableLiveData<Boolean>()
@@ -154,6 +155,7 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     }
 
     fun editItemAppear(item: ItemInfo) {
+        selectedGroupId.value = item.group
         editingItem.value = item
         visibleEdit.value = true
         minDateInMillisStart.value = calStartDate.timeInMillis
@@ -360,12 +362,13 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
             }
             workManager.cancelUniqueWork(editingItem.value!!.id.toString())
             viewModelScope.launch {
+                Log.d("Debugging", "${editingItem.value!!.group}")
                 val itemId = itemDao.editItem(
                     ItemInfo(
                         editingItem.value!!.id,
                         textEditName.value!!,
                         if (textEditDescription.value!!.isNotBlank()) textEditDescription.value!! else null,
-                        editingItem.value!!.group,
+                        selectedGroupId.value!!,
                         if (checkedEditDue.value == true) SimpleDateFormat("HH:mm").parse(textEditDueTime.value).time else null,
                         if (checkedEditDue.value == true) SimpleDateFormat("dd/MM/yyyy").parse(textEditDueDate.value).time else null,
                         if (checkedEditItemDate.value == true && checkedEditDaily.value != true && checkedEditWeekly.value != true && checkedEditMonthly.value != true) SimpleDateFormat("dd/MM/yyyy").parse(textEditItemDate.value).time else null,

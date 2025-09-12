@@ -27,6 +27,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,6 +43,7 @@ import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.LocationServices
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import kotlin.math.abs
 
@@ -329,11 +332,40 @@ class HomeFragment : Fragment() {
         }
         binding.btnGroup.setOnClickListener {
             val titleList = viewModel.groups.value!!.map { it.title }.toTypedArray()
+            val idList = viewModel.groups.value!!.map { it.id }.toTypedArray()
             AlertDialog.Builder(requireContext())
                 .setTitle("Choose Group")
                 .setNegativeButton("Cancel", null)
                 .setItems(titleList) { dialog, which ->
                     val selected = titleList[which]
+                    val selectedId = idList[which]
+                    viewModel.textEditParentGroup.value = selected
+                    viewModel.selectedGroupId.value = selectedId
+                    Log.d("Debugging", "Previous: ${viewModel.editingItem.value!!.group} New: $selectedId")
+//                    lifecycleScope.launch {
+//                        itemDao.editItem(
+//                            ItemInfo(
+//                                selectedId,
+//                                viewModel.editingItem.value!!.name,
+//                                viewModel.editingItem.value!!.description,
+//                                viewModel.editingItem.value!!.group,
+//                                viewModel.editingItem.value!!.dueTime,
+//                                viewModel.editingItem.value!!.dueDate,
+//                                viewModel.editingItem.value!!.date,
+//                                viewModel.editingItem.value!!.timeStart,
+//                                viewModel.editingItem.value!!.timeEnd,
+//                                viewModel.editingItem.value!!.rangeStart,
+//                                viewModel.editingItem.value!!.rangeEnd,
+//                                viewModel.editingItem.value!!.repeatType,
+//                                viewModel.editingItem.value!!.checked,
+//                                viewModel.editingItem.value!!.remind,
+//                                viewModel.editingItem.value!!.locationIds
+//                            )
+//                        )
+//                        todoListRecyclerViewAdapter.notifyItemChanged(todoListRecyclerViewAdapter.getPosition(selectedId))
+//                        todoListRecyclerViewAdapter.notifyItemChanged(todoListRecyclerViewAdapter.getPosition(viewModel.editingItem.value!!.group))
+//                    }
+                    Log.d("Debugging", "Selected: $selected")
                 }
                 .show()
         }

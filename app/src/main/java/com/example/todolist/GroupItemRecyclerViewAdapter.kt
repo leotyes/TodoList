@@ -93,7 +93,7 @@ class GroupItemRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel,
     fun resetSwiped(position: Int) {
         recyclerView?.post {
             notifyItemChanged(position)
-            Log.i("Debug", "uh hello")
+            Log.i("Debug", "hello")
         }
     }
 }
