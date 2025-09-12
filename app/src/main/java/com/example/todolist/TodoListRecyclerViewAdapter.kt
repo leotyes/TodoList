@@ -1,6 +1,7 @@
 package com.example.todolist
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Canvas
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,6 +9,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColor
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -89,11 +91,12 @@ class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragme
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
             ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun isLongPressDragEnabled(): Boolean {
-                return if (expandCheck(item.id)) {
-                    true
-                } else {
-                    false
-                }
+                return false
+//                return if (expandCheck(item.id)) {
+//                    true
+//                } else {
+//                    false
+//                }
             }
 
             override fun onChildDraw(
@@ -180,6 +183,7 @@ class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragme
         )
         itemTouchHelper.attachToRecyclerView(binding.rvItems)
         binding.tvTitle.text = item.title
+        binding.viewColour.backgroundTintList = ColorStateList.valueOf(item.colour)
         binding.btnArrow.setOnClickListener {
             expandClickedListener(item.id)
         }
@@ -209,6 +213,7 @@ class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragme
             binding.btnArrow.setImageResource(R.drawable.baseline_keyboard_arrow_down_24)
         }
         binding.btnEditName.setOnClickListener {
+            viewModel.selectedColour.value = item.colour
             editListener(item)
         }
         binding.btnAdd.setOnClickListener {

@@ -4,10 +4,10 @@
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
         <item name="android:timePickerStyle">@style/SpinnerTimePickerStyle</item>
-        <item name="colorPrimary">@color/dark_blue</item>
-        <item name="colorAccent">@color/dark_blue</item>
-        <item name="colorBackgroundFloating">@color/dark_blue</item>
-        <item name="colorButtonNormal">@color/dark_blue</item>
+        <item name="colorPrimary">@color/medium_green</item>
+        <item name="colorAccent">@color/medium_green</item>
+        <item name="colorBackgroundFloating">@color/medium_green</item>
+        <item name="colorButtonNormal">@color/medium_green</item>
     </style>
 
     <style name="SpinnerTimePickerStyle" parent="Widget.MaterialComponents.TimePicker">

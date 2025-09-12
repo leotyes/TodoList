@@ -81,6 +81,7 @@ dependencies {
 //    implementation(libs.androidx.core.ktx)
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.core:core:1.13.1")
+    implementation("com.github.duanhong169:colorpicker:1.1.6")
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)

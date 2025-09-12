@@ -34,6 +34,7 @@ import com.example.todolist.workers.MonthlyNotificationWorker
 import com.example.todolist.workers.SingleNotificationWorker
 import com.example.todolist.workers.WeeklyNotificationWorker
 import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.maps.model.LatLng
 import com.squareup.moshi.Moshi
@@ -79,6 +80,7 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     val visibleEditRanges = MutableLiveData<Boolean>()
     val visibleEditTimes = MutableLiveData<Boolean>()
     val visibleEditRemind = MutableLiveData<Boolean>()
+    val selectedColour = MutableLiveData<Int>()
     val parentGroup = MutableLiveData<Long>()
     val calStartDate = Calendar.getInstance()
     val calDate = Calendar.getInstance()
@@ -90,8 +92,9 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
     val visibleLocationHint = MutableLiveData<Boolean>()
     val toastText = MutableLiveData<String>()
     val locationRemindManager = MutableLiveData<EditLocationRemindManager>()
+    val geofencingClient = MutableLiveData<GeofencingClient>()
     private val dataStore = application.dataStore
-    private lateinit var workManager: WorkManager
+    private var workManager: WorkManager
     private val moshi = Moshi.Builder().build()
     private val locationIdsJsonAdapter = moshi.adapter<List<List<Any>>>(Types.newParameterizedType(List::class.java, Types.newParameterizedType(List::class.java, Any::class.java)))
 
@@ -132,11 +135,12 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
                     GroupInfo(
                         editingGroup.value!!,
                         textNewGroupName.value!!,
+                        selectedColour.value!!
                     )
                 )
             }
             textNewGroupName.value = ""
-            return "Group name updated"
+            return "Group updated"
         } else {
             return "Group name cannot be blank"
         }
@@ -759,9 +763,17 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
         itemDao.getGroupedItems(item.id).observeForever {
             viewModelScope.launch {
                 if (it != null) {
+                    val removeList = mutableListOf<String>()
                     for (itemDelete in it) {
                         WorkManager.getInstance(application).cancelUniqueWork(itemDelete.id.toString())
+                        if (!itemDelete.locationIds.isNullOrEmpty() && !itemDelete.locationIds.isNullOrBlank()) {
+                            val locationIds = locationIdsJsonAdapter.fromJson(itemDelete.locationIds)
+                            for (location in locationIds!!) {
+                                removeList.add("${itemDelete.id} ${location[0]}")
+                            }
+                        }
                     }
+                    geofencingClient.value!!.removeGeofences(removeList)
                     itemDao.deleteGroupedItems(item.id)
                     todoDao.deleteItem(item)
                 }

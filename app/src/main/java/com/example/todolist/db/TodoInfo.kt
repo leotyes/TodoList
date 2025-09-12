@@ -47,5 +47,7 @@ data class GroupInfo(
     @ColumnInfo(name = "group_id")
     var id: Long,
     @ColumnInfo(name = "group_title")
-    var title: String
+    var title: String,
+    @ColumnInfo(name = "group_colour")
+    var colour: Int
 )

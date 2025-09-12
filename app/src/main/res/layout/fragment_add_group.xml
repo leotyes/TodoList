@@ -37,6 +37,33 @@
                     android:textSize="36sp"
                     android:textStyle="bold" />
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp">
+
+                    <TextView
+                        android:id="@+id/textView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/poppins"
+                        android:gravity="center_vertical"
+                        android:text="Colour"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnColour"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".25"
+                        android:backgroundTint="#C6E99F"
+                        app:cornerRadius="6dp" />
+                </LinearLayout>
+
                 <EditText
                     android:id="@+id/etName"
                     android:layout_width="wrap_content"

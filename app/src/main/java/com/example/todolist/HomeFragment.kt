@@ -10,6 +10,7 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.icu.util.Calendar
 import android.os.Build
 import android.os.Bundle
@@ -26,6 +27,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.graphics.toColorInt
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
@@ -44,6 +46,7 @@ import com.google.android.gms.location.LocationServices
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import kotlinx.coroutines.launch
+import top.defaults.colorpicker.ColorPickerPopup
 import java.text.SimpleDateFormat
 import kotlin.math.abs
 
@@ -120,6 +123,7 @@ class HomeFragment : Fragment() {
         val factory = HomeViewModelFactory(todoDao, itemDao, requireActivity().application)
         viewModel = ViewModelProvider(this, factory).get(HomeFragmentViewModel(todoDao, itemDao, requireActivity().application)::class.java)
         geofencingClient = LocationServices.getGeofencingClient(requireActivity())
+        viewModel.geofencingClient.value = geofencingClient
     }
 
     override fun onCreateView(
@@ -137,6 +141,28 @@ class HomeFragment : Fragment() {
                 val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
                 startActivity(intent)
             }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(requireContext(), "Please allow background location usage in settings or location reminders will not work", Toast.LENGTH_LONG).show()
+            }
+        }
+        binding.btnColour.setOnClickListener {
+            ColorPickerPopup.Builder(requireContext())
+                .initialColor(viewModel.selectedColour.value!!)
+                .enableBrightness(true)
+                .enableAlpha(false)
+                .okTitle("Choose")
+                .cancelTitle("Cancel")
+                .showIndicator(false)
+                .showValue(false)
+                .build()
+                .show(it, object : ColorPickerPopup.ColorPickerObserver() {
+                    override fun onColorPicked(color: Int) {
+                        viewModel.selectedColour.value = color
+                        binding.btnColour.backgroundTintList = ColorStateList.valueOf(color)
+                    }
+                })
         }
         viewModel.locationRemindManager.value = locationRemindManager
         viewModel.visibleLocationHint.observe(viewLifecycleOwner) {
@@ -185,6 +211,8 @@ class HomeFragment : Fragment() {
             {
                 selectedGroup: GroupInfo -> viewModel.editClicked(selectedGroup.id)
                 binding.view.visibility = View.VISIBLE
+                binding.btnColour.backgroundTintList = ColorStateList.valueOf(viewModel.selectedColour.value!!)
+                binding.etNewName.setText(selectedGroup.title)
                 binding.cvEditName.visibility = View.VISIBLE
             },
             {

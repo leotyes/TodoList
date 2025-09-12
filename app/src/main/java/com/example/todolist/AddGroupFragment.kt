@@ -1,5 +1,7 @@
 package com.example.todolist
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -13,6 +15,8 @@ import com.example.todolist.databinding.FragmentHomeBinding
 import com.example.todolist.db.ItemDao
 import com.example.todolist.db.TodoDao
 import com.example.todolist.db.TodoDatabase
+import top.defaults.colorpicker.ColorPickerPopup
+import androidx.core.graphics.toColorInt
 
 class AddGroupFragment : Fragment() {
     private lateinit var binding: FragmentAddGroupBinding
@@ -37,10 +41,28 @@ class AddGroupFragment : Fragment() {
         binding.lifecycleOwner = viewLifecycleOwner
         binding.btnDone.setOnClickListener {
             viewModel.addGroup()
+            viewModel.selectedColour.value = "#C6E99F".toColorInt()
         }
         viewModel.groupResult.observe(viewLifecycleOwner) { result ->
             Toast.makeText(requireContext(), result, Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_addGroupFragment_to_homeFragment)
+        }
+        binding.btnColour.setOnClickListener {
+            ColorPickerPopup.Builder(requireContext())
+                .initialColor("#C6E99F".toColorInt())
+                .enableBrightness(true)
+                .enableAlpha(false)
+                .okTitle("Choose")
+                .cancelTitle("Cancel")
+                .showIndicator(false)
+                .showValue(false)
+                .build()
+                .show(it, object : ColorPickerPopup.ColorPickerObserver() {
+                    override fun onColorPicked(color: Int) {
+                        viewModel.selectedColour.value = color
+                        binding.btnColour.backgroundTintList = ColorStateList.valueOf(color)
+                    }
+                })
         }
         return binding.root
     }
