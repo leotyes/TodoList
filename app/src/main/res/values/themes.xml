@@ -5,6 +5,11 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
         <item name="android:timePickerStyle">@style/SpinnerTimePickerStyle</item>
         <item name="colorPrimary">@color/medium_green</item>
+        <item name="colorPrimaryVariant">@color/medium_green</item>
+        <item name="colorSecondary">@color/medium_green</item>
+<!--        <item name="colorControlHighlight">@color/medium_green</item>-->
+<!--        <item name="colorControlActivated">@color/medium_green</item>-->
+        <item name="colorSecondaryContainer">@color/medium_green</item>
         <item name="colorAccent">@color/medium_green</item>
         <item name="colorBackgroundFloating">@color/medium_green</item>
         <item name="colorButtonNormal">@color/medium_green</item>

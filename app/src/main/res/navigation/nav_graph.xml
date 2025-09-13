@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_homeFragment_to_addItemFragment"
             app:destination="@id/addItemFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_calendarFragment"
+            app:destination="@id/calendarFragment" />
     </fragment>
     <fragment
         android:id="@+id/addGroupFragment"
@@ -25,6 +28,9 @@
         <action
             android:id="@+id/action_addGroupFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_addGroupFragment_to_calendarFragment"
+            app:destination="@id/calendarFragment" />
     </fragment>
     <fragment
         android:id="@+id/addItemFragment"
@@ -37,5 +43,23 @@
         <action
             android:id="@+id/action_addItemFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_addItemFragment_to_calendarFragment"
+            app:destination="@id/calendarFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/calendarFragment"
+        android:name="com.example.todolist.CalendarFragment"
+        android:label="fragment_calendar"
+        tools:layout="@layout/fragment_calendar" >
+        <action
+            android:id="@+id/action_calendarFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_calendarFragment_to_addItemFragment"
+            app:destination="@id/addItemFragment" />
+        <action
+            android:id="@+id/action_calendarFragment_to_addGroupFragment"
+            app:destination="@id/addGroupFragment" />
     </fragment>
 </navigation>

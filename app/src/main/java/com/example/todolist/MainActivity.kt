@@ -1,11 +1,16 @@
 package com.example.todolist
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import com.example.todolist.databinding.ActivityMainBinding
 import com.google.android.libraries.places.api.Places
 
@@ -23,5 +28,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         Places.initialize(applicationContext, BuildConfig.PLACES_API_KEY)
         placesManager.getPlacesClient(applicationContext)
+
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
+        val navController = navHostFragment.navController
+
+        binding.bottomNavigationView.setupWithNavController(navController)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if (destination.id == R.id.addItemFragment || destination.id == R.id.addGroupFragment) {
+                binding.bottomNavigationView.visibility = View.GONE
+            } else {
+                binding.bottomNavigationView.visibility = View.VISIBLE
+            }
+        }
     }
 }

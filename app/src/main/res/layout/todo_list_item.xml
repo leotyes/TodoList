@@ -102,7 +102,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:background="@drawable/round_corner"
-            android:backgroundTint="#E63946"
+            android:backgroundTint="#C6E99F"
             android:visibility="gone"
             app:srcCompat="@drawable/baseline_delete_24" />
 
