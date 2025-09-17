@@ -58,7 +58,7 @@ class DailyNotificationWorker(private val appContext: Context, private val worke
         }
         if (itemId != -1L) {
             val builder = NotificationCompat.Builder(appContext, "notification_channel")
-                .setSmallIcon(R.drawable.baseline_keyboard_arrow_up_24)
+                .setSmallIcon(R.drawable.baseline_circle_notifications_24)
                 .setContentTitle("$itemName at $itemTime every day")
                 .setContentText("$itemRemind minutes before")
                 .setStyle(NotificationCompat.BigTextStyle()
@@ -109,7 +109,7 @@ class WeeklyNotificationWorker(private val appContext: Context, private val work
         }
         if (itemId != -1L) {
             val builder = NotificationCompat.Builder(appContext, "notification_channel")
-                .setSmallIcon(R.drawable.baseline_keyboard_arrow_up_24)
+                .setSmallIcon(R.drawable.baseline_circle_notifications_24)
                 .setContentTitle("$itemName at $itemTime every $itemDay")
                 .setContentText("$itemRemind minutes before")
                 .setStyle(NotificationCompat.BigTextStyle()
@@ -158,7 +158,7 @@ class MonthlyNotificationWorker(private val appContext: Context, private val wor
         } else {
             if (itemId != -1L) {
                 val builder = NotificationCompat.Builder(appContext, "notification_channel")
-                    .setSmallIcon(R.drawable.baseline_keyboard_arrow_up_24)
+                    .setSmallIcon(R.drawable.baseline_circle_notifications_24)
                     .setContentTitle("$itemName at $itemTime on the $itemDay of every month")
                     .setContentText("$itemRemind minutes before")
                     .setStyle(NotificationCompat.BigTextStyle()
@@ -238,7 +238,7 @@ class SingleNotificationWorker(private val appContext: Context, private val work
         val itemId = workerParams.inputData.getLong(TODO_ID, -1)
         if (itemId != -1L) {
             val builder = NotificationCompat.Builder(appContext, "notification_channel")
-                .setSmallIcon(R.drawable.baseline_keyboard_arrow_up_24)
+                .setSmallIcon(R.drawable.baseline_circle_notifications_24)
                 .setContentTitle("$itemName at $itemTime")
                 .setContentText("$itemRemind minutes before")
                 .setStyle(NotificationCompat.BigTextStyle()

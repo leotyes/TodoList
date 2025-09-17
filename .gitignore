@@ -12,3 +12,5 @@
 .cxx
 local.properties
 secrets.properties
+/app/release
+/app/release/*

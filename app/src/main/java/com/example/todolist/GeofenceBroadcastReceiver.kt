@@ -54,9 +54,9 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                             val place = response.place
                             val moshi = Moshi.Builder().build()
                             val locationIdsJsonAdapter = moshi.adapter<List<List<Any>>>(Types.newParameterizedType(List::class.java, Types.newParameterizedType(List::class.java, Any::class.java)))
-                            val locationRadius = locationIdsJsonAdapter.fromJson(item.locationIds)?.first { it[0] == placeId }?.get(1) as Int
+                            val locationRadius = (locationIdsJsonAdapter.fromJson(item.locationIds)?.first { it[0] == placeId }?.get(1) as Double).toInt()
                             val builder = NotificationCompat.Builder(context, "notification_channel")
-                                .setSmallIcon(R.drawable.baseline_keyboard_arrow_up_24)
+                                .setSmallIcon(R.drawable.baseline_circle_notifications_24)
                                 .setContentTitle("${item.name} at ${place.formattedAddress}")
                                 .setContentText("$locationRadius km away")
                                 .setStyle(
