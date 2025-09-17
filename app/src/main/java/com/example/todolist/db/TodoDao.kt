@@ -25,4 +25,7 @@ interface TodoDao {
 
     @Query("SELECT * FROM todo_data_table")
     fun getItems(): LiveData<List<GroupInfo>>
+
+    @Query("SELECT * FROM todo_data_table")
+    suspend fun getItemsList(): List<GroupInfo>
 }

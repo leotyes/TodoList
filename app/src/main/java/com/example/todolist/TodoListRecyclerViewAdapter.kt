@@ -46,7 +46,8 @@ class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, 
 
     fun expand(groupId: Long) {
         val position = groupsAdapter.indexOfFirst { it.id == groupId }
-        Log.i("Debug", "${groupsAdapter[position]}")
+        Log.i("Debug", "${groupId}")
+//        Log.i("Debug", "${groupsAdapter[position]}")
         if (viewModel.expandedGroup.value == groupId) {
             viewModel.expandedGroup.value = -1L
         } else {
@@ -77,6 +78,7 @@ class TodoListRecyclerViewAdapter(private val viewModel: HomeFragmentViewModel, 
         Log.i("Debug", list.toString())
         groupsAdapter.clear()
         groupsAdapter.addAll(list)
+        notifyDataSetChanged()
     }
 
     fun getPosition(groupId: Long): Int {
@@ -174,8 +176,7 @@ class TodoViewHolder(val binding: TodoListItemBinding, val viewModel: HomeFragme
                         innerAdapter.editItem(swipedItem)
                         Log.i("Debug", "Resetting swiped item at position: $position")
                         innerAdapter.resetSwiped(position)
-                        expandClickedListener(item.id)
-                        expandClickedListener(item.id)
+//                        expandClickedListener(item.id)
                     }
                 }
             }

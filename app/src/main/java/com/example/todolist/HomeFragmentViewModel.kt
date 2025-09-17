@@ -225,12 +225,15 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
         if (item.repeatType == 1) {
             checkedEditDaily.value = true
             visibleEditRanges.value = true
+            visibleEditTimes.value = true
         } else if (item.repeatType == 2) {
             checkedEditWeekly.value = true
             visibleEditRanges.value = true
+            visibleEditTimes.value = true
         } else if (item.repeatType == 3) {
             checkedEditMonthly.value = true
             visibleEditRanges.value = true
+            visibleEditTimes.value = true
         } else {
             visibleEditRanges.value = false
             checkedEditDaily.value = false
@@ -311,7 +314,7 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
                 tempCal2.set(Calendar.HOUR_OF_DAY, 0)
                 tempCal.set(Calendar.MINUTE, 0)
                 tempCal.set(Calendar.HOUR_OF_DAY, 0)
-                if (tempCal.after(calStartDate)) return "Start Date Is Before Current Date"
+                if (tempCal.after(calStartDate) && checkedEditRangeStart.value == true) return "Start Date Is Before Current Date"
             }
             if (checkedEditRemind.value == true) {
                 if (textEditRemind.value!!.isBlank() || textEditRemind.value == "") return "Reminder Time Cannot Be Blank"
@@ -674,9 +677,15 @@ class HomeFragmentViewModel(private val todoDao: TodoDao, private val itemDao: I
 
     fun calcMinEndDate() {
         if (checkedEditDaily.value == true) {
+            Log.d("Debugging", "why doesn't it wokr")
             minDateInMillisEnd.value = calStartDate.timeInMillis + 86400000
+            Log.d("Debugging", "${SimpleDateFormat("dd/MM/yyyy").format(calEndDate.time)}")
+            Log.d("Debugging", "${SimpleDateFormat("dd/MM/yyyy").format(minDateInMillisEnd.value)}")
             if (calEndDate.timeInMillis < minDateInMillisEnd.value!!) {
+                Log.d("Debugging", "very weird")
                 calEndDate.timeInMillis = minDateInMillisEnd.value!!
+                textEditDateEnd.value = SimpleDateFormat("dd/MM/yyyy").format(calEndDate.time)
+            } else {
                 textEditDateEnd.value = SimpleDateFormat("dd/MM/yyyy").format(calEndDate.time)
             }
         } else if (checkedEditWeekly.value == true) {

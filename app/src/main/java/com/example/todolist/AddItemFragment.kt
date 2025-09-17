@@ -59,6 +59,11 @@ class AddItemFragment : Fragment() {
         binding.viewModel = viewModel
         viewModel.parentGroup.value = args.group
         binding.lifecycleOwner = viewLifecycleOwner
+        if (args.calendar) {
+            viewModel.checkedItemDate.value = true
+            viewModel.calDate.time = SimpleDateFormat("dd/MM/yyyy").parse(args.date)
+            viewModel.textItemDate.value = args.date
+        }
         locationRemindManager = LocationRemindManager(requireContext(), binding.llLocationRemind, inflater, viewModel)
         viewModel.visibleLocationHint.observe(viewLifecycleOwner) {
             if (it) {
@@ -93,6 +98,7 @@ class AddItemFragment : Fragment() {
             }
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
+                android.R.style.Theme_Material_Dialog,
                 dateSetListener,
                 2025,
                 0,
@@ -110,6 +116,7 @@ class AddItemFragment : Fragment() {
             }
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
+                android.R.style.Theme_Material_Dialog,
                 dateSetListener,
                 2025,
                 0,
@@ -164,7 +171,13 @@ class AddItemFragment : Fragment() {
                             }
                         }
                     }
-                    findNavController().navigate(R.id.action_addItemFragment_to_homeFragment)
+                    if (args.calendar) {
+                        val action = AddItemFragmentDirections.actionAddItemFragmentToCalendarFragment(args.date)
+                        findNavController().navigate(action)
+                        return@launch
+                    }
+                    val action = AddItemFragmentDirections.actionAddItemFragmentToHomeFragment(args.group)
+                    findNavController().navigate(action)
                 }
                 Toast.makeText(requireContext(), result.first, Toast.LENGTH_LONG).show()
             }
@@ -300,6 +313,7 @@ class AddItemFragment : Fragment() {
         binding.btnStartDate.setOnClickListener {
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
+                android.R.style.Theme_Material_Dialog,
                 dateStartSetListener,
                 2025,
                 0,
@@ -311,6 +325,7 @@ class AddItemFragment : Fragment() {
         binding.btnEndDate.setOnClickListener {
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
+                android.R.style.Theme_Material_Dialog,
                 dateEndSetListener,
                 2025,
                 0,

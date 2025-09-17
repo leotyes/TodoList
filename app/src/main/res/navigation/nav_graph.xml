@@ -10,6 +10,10 @@
         android:name="com.example.todolist.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" >
+        <argument
+            android:name="group"
+            android:defaultValue="-1L"
+            app:argType="long" />
         <action
             android:id="@+id/action_homeFragment_to_addGroupFragment"
             app:destination="@id/addGroupFragment" />
@@ -40,6 +44,14 @@
         <argument
             android:name="group"
             app:argType="long" />
+        <argument
+            android:name="calendar"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="date"
+            android:defaultValue=""
+            app:argType="string" />
         <action
             android:id="@+id/action_addItemFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
@@ -52,6 +64,10 @@
         android:name="com.example.todolist.CalendarFragment"
         android:label="fragment_calendar"
         tools:layout="@layout/fragment_calendar" >
+        <argument
+            android:name="date"
+            android:defaultValue=""
+            app:argType="string" />
         <action
             android:id="@+id/action_calendarFragment_to_homeFragment"
             app:destination="@id/homeFragment" />

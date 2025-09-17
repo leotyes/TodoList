@@ -248,7 +248,7 @@ class AddItemFragmentViewModel(private val application: Application, private val
                 tempCal2.set(Calendar.HOUR_OF_DAY, 0)
                 tempCal.set(Calendar.MINUTE, 0)
                 tempCal.set(Calendar.HOUR_OF_DAY, 0)
-                if (tempCal.after(calStartDate)) return "Start Date Is Before Current Date"
+                if (tempCal.after(calStartDate) && checkedRangeStart.value == true) return "Start Date Is Before Current Date"
             }
             if (checkedRemind.value == true) {
                 if (textRemind.value!!.isBlank() || textRemind.value == "") return "Reminder Time Cannot Be Blank"

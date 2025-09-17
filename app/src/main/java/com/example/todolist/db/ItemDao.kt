@@ -26,6 +26,9 @@ interface ItemDao {
     @Query("SELECT * FROM item_data_table")
     fun getItems(): LiveData<List<ItemInfo>>
 
+    @Query("SELECT * FROM item_data_table")
+    suspend fun getItemsList(): List<ItemInfo>
+
     @Query("SELECT * FROM item_data_table WHERE todo_group = :parentGroup")
     fun getGroupedItems(parentGroup: Long): LiveData<List<ItemInfo>>
 

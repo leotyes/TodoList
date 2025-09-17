@@ -32,6 +32,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -58,6 +59,7 @@ class HomeFragment : Fragment() {
     private lateinit var itemDao: ItemDao
     private lateinit var locationRemindManager: EditLocationRemindManager
     private lateinit var geofencingClient: GeofencingClient
+    private val args: HomeFragmentArgs by navArgs()
     val moshi = Moshi.Builder().build()
     val locationIdsJsonAdapter = moshi.adapter<List<List<Any>>>(Types.newParameterizedType(List::class.java, Types.newParameterizedType(List::class.java, Any::class.java)))
 
@@ -181,7 +183,6 @@ class HomeFragment : Fragment() {
         binding.btnLocationRemind.setOnClickListener {
             locationRemindManager.addItem()
         }
-        binding.rvGroups.layoutManager = LinearLayoutManager(requireContext().applicationContext)
         viewModel.visibleEdit.observe(viewLifecycleOwner) {
             binding.cvEditItem.visibility = if (it) View.VISIBLE else View.GONE
             binding.view.visibility = if (it) View.VISIBLE else View.GONE
@@ -226,7 +227,7 @@ class HomeFragment : Fragment() {
             },
             {
                 item, checked -> viewModel.itemChecked(item, checked)
-            },
+            }
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val importance = NotificationManager.IMPORTANCE_DEFAULT
@@ -238,6 +239,7 @@ class HomeFragment : Fragment() {
         }
         binding.rvGroups.adapter = todoListRecyclerViewAdapter
         binding.rvGroups.scrollToPosition(0)
+        binding.rvGroups.layoutManager = LinearLayoutManager(requireContext().applicationContext)
         binding.btnDoneName.setOnClickListener {
             Toast.makeText(requireContext(), viewModel.doneNameClicked(), Toast.LENGTH_LONG).show()
             binding.cvEditName.visibility = View.GONE
@@ -245,7 +247,9 @@ class HomeFragment : Fragment() {
         }
         viewModel.groups.observe(viewLifecycleOwner, {
             todoListRecyclerViewAdapter.setList(it)
-            todoListRecyclerViewAdapter.notifyDataSetChanged()
+            if (args.group > 0) {
+                todoListRecyclerViewAdapter.expand(args.group)
+            }
         })
         binding.fabAdd.setOnClickListener {
             viewModel.addGroup()
@@ -269,6 +273,7 @@ class HomeFragment : Fragment() {
             }
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
+                android.R.style.Theme_Material_Dialog,
                 dateSetListener,
                 2025,
                 0,
@@ -286,6 +291,7 @@ class HomeFragment : Fragment() {
             }
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
+                android.R.style.Theme_Material_Dialog,
                 dateSetListener,
                 2025,
                 0,
@@ -504,6 +510,7 @@ class HomeFragment : Fragment() {
         binding.btnStartDate.setOnClickListener {
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
+                android.R.style.Theme_Material_Dialog,
                 dateStartSetListener,
                 2025,
                 0,
@@ -515,6 +522,7 @@ class HomeFragment : Fragment() {
         binding.btnEndDate.setOnClickListener {
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
+                android.R.style.Theme_Material_Dialog,
                 dateEndSetListener,
                 2025,
                 0,

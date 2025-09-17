@@ -13,6 +13,553 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cvChooseGroup"
+            android:layout_width="325dp"
+            android:layout_height="wrap_content"
+            android:elevation="11dp"
+            android:visibility="gone"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="11dp"
+            app:cardMaxElevation="11dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias=".45">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="25dp">
+
+                <TextView
+                    android:id="@+id/tvEditName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins"
+                    android:text="Choose Parent Group"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/llGroupNew"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/tvGroupInfoNew"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/poppins"
+                        android:gravity="center_vertical"
+                        android:text="Group"
+                        android:textSize="16sp" />
+
+                    <Button
+                        android:id="@+id/btnGroupNew"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="75dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_weight="1"
+                        android:elevation="4dp"
+                        android:fontFamily="@font/poppins"
+                        android:maxLines="1"
+                        android:text="@={viewModel.textParentGroup}"
+                        android:textColor="#FFFFFF"
+                        app:cornerRadius="15dp" />
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnDoneNew"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins"
+                    android:text="@string/done"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <View
+            android:id="@+id/viewExit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#BF000000"
+            android:clickable="true"
+            android:elevation="10dp"
+            android:focusable="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cvEditItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:visibility="invisible"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvEditItem"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/poppins"
+                    android:text="@string/edit_item"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingStart="15dp"
+                        android:paddingEnd="15dp"
+                        android:paddingBottom="15dp">
+
+                        <LinearLayout
+                            android:id="@+id/llGroup"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:visibility="visible">
+
+                            <TextView
+                                android:id="@+id/tvGroupInfo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/poppins"
+                                android:gravity="center_vertical"
+                                android:text="Parent Group"
+                                android:textSize="16sp" />
+
+                            <Button
+                                android:id="@+id/btnGroup"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="75dp"
+                                android:layout_marginEnd="0dp"
+                                android:layout_weight="1"
+                                android:elevation="4dp"
+                                android:fontFamily="@font/poppins"
+                                android:maxLines="1"
+                                android:text="@={viewModel.textEditParentGroup}"
+                                android:textColor="#FFFFFF"
+                                app:cornerRadius="15dp" />
+
+                        </LinearLayout>
+
+                        <EditText
+                            android:id="@+id/etItemName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:fontFamily="@font/poppins"
+                            android:hint="@string/name"
+                            android:inputType="text"
+                            android:text="@={viewModel.textEditName}" />
+
+                        <EditText
+                            android:id="@+id/etItemDescription"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:fontFamily="@font/poppins"
+                            android:hint="@string/description"
+                            android:inputType="text|textMultiLine"
+                            android:maxLines="5"
+                            android:singleLine="false"
+                            android:text="@={viewModel.textEditDescription}" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+
+                            <CheckBox
+                                android:id="@+id/cbDue"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:checked="@={viewModel.checkedEditDue}"
+                                android:fontFamily="@font/poppins"
+                                android:singleLine="true"
+                                android:text="@string/due"
+                                android:textSize="18sp" />
+
+                            <Button
+                                android:id="@+id/btnTimeDue"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="10dp"
+                                android:layout_weight="1"
+                                android:elevation="4dp"
+                                android:fontFamily="@font/poppins"
+                                android:maxLines="1"
+                                android:text="@={viewModel.textEditDueTime}"
+                                android:textColor="#FFFFFF"
+                                app:cornerRadius="15dp" />
+
+                            <Button
+                                android:id="@+id/btnDayDue"
+                                android:layout_width="36dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:elevation="4dp"
+                                android:fontFamily="@font/poppins"
+                                android:maxLines="1"
+                                android:text="@={viewModel.textEditDueDate}"
+                                android:textColor="#FFFFFF"
+                                app:cornerRadius="15dp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+
+                            <CheckBox
+                                android:id="@+id/cbDaily"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:checked="@={viewModel.checkedEditDaily}"
+                                android:fontFamily="@font/poppins"
+                                android:text="@string/daily" />
+
+                            <CheckBox
+                                android:id="@+id/cbWeekly"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:checked="@={viewModel.checkedEditWeekly}"
+                                android:fontFamily="@font/poppins"
+                                android:text="@string/weekly" />
+
+                            <CheckBox
+                                android:id="@+id/cbMonthly"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:checked="@={viewModel.checkedEditMonthly}"
+                                android:fontFamily="@font/poppins"
+                                android:text="@string/monthly" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/llDate"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:visibility="visible">
+
+                            <CheckBox
+                                android:id="@+id/cbDate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:checked="@={viewModel.checkedEditItemDate}"
+                                android:fontFamily="@font/poppins"
+                                android:singleLine="true"
+                                android:text="@string/date"
+                                android:textSize="18sp" />
+
+                            <Button
+                                android:id="@+id/btnItemDay"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="75dp"
+                                android:layout_marginEnd="0dp"
+                                android:layout_weight="1"
+                                android:elevation="4dp"
+                                android:fontFamily="@font/poppins"
+                                android:maxLines="1"
+                                android:text="@={viewModel.textEditItemDate}"
+                                android:textColor="#FFFFFF"
+                                app:cornerRadius="15dp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/llRangeStart"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                            <CheckBox
+                                android:id="@+id/cbStartDate"
+                                android:layout_width="14dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:checked="@={viewModel.checkedEditRangeStart}"
+                                android:fontFamily="@font/poppins"
+                                android:singleLine="true"
+                                android:text="@string/start_date"
+                                android:textSize="18sp" />
+
+                            <Button
+                                android:id="@+id/btnStartDate"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="20dp"
+                                android:layout_weight="1"
+                                android:elevation="4dp"
+                                android:fontFamily="@font/poppins"
+                                android:maxLines="1"
+                                android:text="@={viewModel.textEditDateStart}"
+                                android:textColor="#FFFFFF"
+                                app:cornerRadius="15dp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/llRangeEnd"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                            <CheckBox
+                                android:id="@+id/cbEndDate"
+                                android:layout_width="4dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:checked="@={viewModel.checkedEditRangeEnd}"
+                                android:fontFamily="@font/poppins"
+                                android:singleLine="true"
+                                android:text="@string/end_date"
+                                android:textSize="18sp" />
+
+                            <Button
+                                android:id="@+id/btnEndDate"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="30dp"
+                                android:layout_weight="1"
+                                android:elevation="4dp"
+                                android:fontFamily="@font/poppins"
+                                android:maxLines="1"
+                                android:text="@={viewModel.textEditDateEnd}"
+                                android:textColor="#FFFFFF"
+                                app:cornerRadius="15dp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/llStartTime"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                            <CheckBox
+                                android:id="@+id/cbStartTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:checked="@={viewModel.checkedEditItemStart}"
+                                android:fontFamily="@font/poppins"
+                                android:singleLine="true"
+                                android:text="@string/start_time"
+                                android:textSize="18sp" />
+
+                            <Button
+                                android:id="@+id/btnItemStart"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="20dp"
+                                android:layout_weight="1"
+                                android:elevation="4dp"
+                                android:fontFamily="@font/poppins"
+                                android:maxLines="1"
+                                android:text="@={viewModel.textEditItemStart}"
+                                android:textColor="#FFFFFF"
+                                app:cornerRadius="15dp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/llEndTime"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                            <CheckBox
+                                android:id="@+id/cbEndTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:checked="@={viewModel.checkedEditItemEnd}"
+                                android:fontFamily="@font/poppins"
+                                android:singleLine="true"
+                                android:text="@string/end_time"
+                                android:textSize="18sp" />
+
+                            <Button
+                                android:id="@+id/btnItemEnd"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="30dp"
+                                android:layout_weight="1"
+                                android:elevation="4dp"
+                                android:fontFamily="@font/poppins"
+                                android:maxLines="1"
+                                android:text="@={viewModel.textEditItemEnd}"
+                                android:textColor="#FFFFFF"
+                                app:cornerRadius="15dp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/llRemind"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                            <CheckBox
+                                android:id="@+id/cbRemind"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:checked="@={viewModel.checkedEditRemind}"
+                                android:fontFamily="@font/poppins"
+                                android:singleLine="true"
+                                android:text="@string/remind"
+                                android:textSize="18sp" />
+
+                            <EditText
+                                android:id="@+id/etRemind"
+                                android:layout_width="1dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:ems="10"
+                                android:fontFamily="@font/poppins"
+                                android:hint="@string/minutes"
+                                android:inputType="text"
+                                android:maxLength="3"
+                                android:text="@={viewModel.textEditRemind}"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/tvRemindBefore"
+                                android:layout_width=".00000001dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="-75dp"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/poppins"
+                                android:gravity="end"
+                                android:text="@string/before"
+                                android:textSize="18sp" />
+
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/llLocationRemindOptions"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+
+                            <CheckBox
+                                android:id="@+id/cbLocationRemind"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:checked="@={viewModel.checkedEditLocation}"
+                                android:fontFamily="@font/poppins"
+                                android:singleLine="true"
+                                android:text="Location"
+                                android:textSize="18sp" />
+
+                            <ImageButton
+                                android:id="@+id/btnLocationRemind"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="#007A1818"
+                                android:paddingTop="8dp"
+                                android:paddingBottom="8dp"
+                                app:srcCompat="@drawable/baseline_add_24" />
+
+                        </LinearLayout>
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <TextView
+                                android:id="@+id/tvLocationHint"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:fontFamily="@font/poppins"
+                                android:gravity="center"
+                                android:text="Locations here"
+                                android:textSize="24sp" />
+
+                            <ScrollView
+                                android:id="@+id/svLocationRemind"
+                                android:layout_width="match_parent"
+                                android:layout_height="150dp">
+
+                                <LinearLayout
+                                    android:id="@+id/llLocationRemind"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical" />
+                            </ScrollView>
+                        </FrameLayout>
+
+                    </LinearLayout>
+                </ScrollView>
+
+                <Button
+                    android:id="@+id/btnItemDone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="50dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:fontFamily="@font/poppins"
+                    android:text="@string/done"
+                    android:textSize="18sp"
+                    app:cornerRadius="15dp" />
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
         <TextView
             android:id="@+id/tvCalendar"
             android:layout_width="wrap_content"
@@ -29,7 +576,7 @@
             app:layout_constraintVertical_bias="0.065" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabAdd2"
+            android:id="@+id/fabAddCalendar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
@@ -39,7 +586,7 @@
             app:layout_constraintHorizontal_bias="0.921"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias=".29"
+            app:layout_constraintVertical_bias=".325"
             app:srcCompat="@drawable/baseline_add_24" />
 
         <LinearLayout
@@ -52,7 +599,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias=".175">
+            app:layout_constraintVertical_bias=".205">
 
             <ImageButton
                 android:id="@+id/btnWeekPrev"
@@ -64,19 +611,22 @@
                 android:src="@drawable/baseline_keyboard_arrow_left_24" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clSun"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:clickable="true">
 
                 <View
-                    android:id="@+id/viewSun"
+                    android:id="@+id/viewDay1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/round_corner"
-                    android:backgroundTint="#80C6E99F"
+                    android:background="@drawable/calendar_round_corner"
+                    android:backgroundTint="#FFFFFF"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -113,19 +663,22 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clMon"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:clickable="true">
 
                 <View
-                    android:id="@+id/viewMon"
+                    android:id="@+id/viewDay2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/round_corner"
-                    android:backgroundTint="#80C6E99F"
+                    android:background="@drawable/calendar_round_corner"
+                    android:backgroundTint="#FFFFFF"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -161,19 +714,22 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clTue"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:clickable="true">
 
                 <View
-                    android:id="@+id/viewTue"
+                    android:id="@+id/viewDay3"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/round_corner"
-                    android:backgroundTint="#80C6E99F"
+                    android:background="@drawable/calendar_round_corner"
+                    android:backgroundTint="#FFFFFF"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -209,19 +765,22 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clWed"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:clickable="true">
 
                 <View
-                    android:id="@+id/viewWed"
+                    android:id="@+id/viewDay4"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/round_corner"
-                    android:backgroundTint="#80C6E99F"
+                    android:background="@drawable/calendar_round_corner"
+                    android:backgroundTint="#FFFFFF"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -257,19 +816,22 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clThu"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:clickable="true">
 
                 <View
-                    android:id="@+id/viewThu"
+                    android:id="@+id/viewDay5"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/round_corner"
-                    android:backgroundTint="#80C6E99F"
+                    android:background="@drawable/calendar_round_corner"
+                    android:backgroundTint="#FFFFFF"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -305,19 +867,22 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clFri"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:clickable="true">
 
                 <View
-                    android:id="@+id/viewFri"
+                    android:id="@+id/viewDay6"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/round_corner"
-                    android:backgroundTint="#80C6E99F"
+                    android:background="@drawable/calendar_round_corner"
+                    android:backgroundTint="#FFFFFF"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -353,19 +918,22 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clSat"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:clickable="true">
 
                 <View
-                    android:id="@+id/viewSat"
+                    android:id="@+id/viewDay7"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/round_corner"
-                    android:backgroundTint="#80C6E99F"
+                    android:background="@drawable/calendar_round_corner"
+                    android:backgroundTint="#FFFFFF"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -411,13 +979,28 @@
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="409dp"
-            android:layout_height="552dp"
-            android:layout_marginTop="1dp"
+            android:id="@+id/rvCalendar"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+        <TextView
+            android:id="@+id/tvMonthYear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins"
+            android:text="@={viewModel.textMonthYear}"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.068"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

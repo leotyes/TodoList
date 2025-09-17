@@ -1,8 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.ToDoList" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.ToDoList" parent="Theme.Material3.Light.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">@color/medium_green</item>
+        <item name="colorPrimaryVariant">@color/medium_green</item>
+        <item name="colorSecondary">@color/medium_green</item>
+        <!--        <item name="colorControlHighlight">@color/medium_green</item>-->
+        <!--        <item name="colorControlActivated">@color/medium_green</item>-->
+        <item name="colorSecondaryContainer">@color/medium_green</item>
+        <item name="colorAccent">@color/medium_green</item>
+        <item name="colorBackgroundFloating">@color/medium_green</item>
+        <item name="colorButtonNormal">@color/medium_green</item>
         <item name="android:timePickerStyle">@style/SpinnerTimePickerStyle</item>
     </style>
 
