@@ -1,6 +1,7 @@
 package com.example.todolist
 
 import android.Manifest
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.BroadcastReceiver
@@ -55,6 +56,18 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                             val moshi = Moshi.Builder().build()
                             val locationIdsJsonAdapter = moshi.adapter<List<List<Any>>>(Types.newParameterizedType(List::class.java, Types.newParameterizedType(List::class.java, Any::class.java)))
                             val locationRadius = (locationIdsJsonAdapter.fromJson(item.locationIds)?.first { it[0] == placeId }?.get(1) as Double).toInt()
+
+                            val intent = Intent(context, MainActivity::class.java).apply {
+                                flags = (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            }
+
+                            val pendingIntent = PendingIntent.getActivity(
+                                context,
+                                itemId.toInt() + 6767,
+                                intent,
+                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                            )
+
                             val builder = NotificationCompat.Builder(context, "notification_channel")
                                 .setSmallIcon(R.drawable.baseline_circle_notifications_24)
                                 .setContentTitle("${item.name} at ${place.formattedAddress}")
@@ -64,6 +77,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                                         .setBigContentTitle("${item.name} at ${place.displayName} in group ${group.title}")
                                         .bigText(item.description))
                                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                .setContentIntent(pendingIntent)
                             with(NotificationManagerCompat.from(context)) {
                                 if (ActivityCompat.checkSelfPermission(
                                         context,

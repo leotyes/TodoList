@@ -243,39 +243,7 @@ class CalendarFragmentViewModel(private val application: Application, private va
     }
 
     fun checkEdit(): String {
-        val tempCal = android.icu.util.Calendar.getInstance()
         if (textEditName.value!! != "") {
-            if (checkedEditDue.value == true) {
-                if (!calDue.after(tempCal)) return "Due Date and Time Are Before Current Date and Time"
-            }
-            if (checkedEditItemDate.value == true) {
-                if (checkedEditItemEnd.value == true && checkedEditItemStart.value == false) {
-                    val tempCal2 = android.icu.util.Calendar.getInstance()
-                    tempCal2.time = calDate.time
-                    tempCal2.set(android.icu.util.Calendar.MINUTE, calStartDate.get(android.icu.util.Calendar.MINUTE))
-                    tempCal2.set(android.icu.util.Calendar.HOUR_OF_DAY, calStartDate.get(android.icu.util.Calendar.HOUR_OF_DAY))
-                    if (!tempCal2.after(tempCal)) return "Date and End Time Are Before Current Date and Time"
-                } else if (checkedEditItemStart.value == false && checkedEditItemEnd.value == false) {
-                    val tempCal2 = android.icu.util.Calendar.getInstance()
-                    tempCal2.time = calDate.time
-                    tempCal2.set(android.icu.util.Calendar.MINUTE, 0)
-                    tempCal2.set(android.icu.util.Calendar.HOUR_OF_DAY, 0)
-                    tempCal.set(android.icu.util.Calendar.MINUTE, 0)
-                    tempCal.set(android.icu.util.Calendar.HOUR_OF_DAY, 0)
-                    if (!tempCal2.after(tempCal)) return "Date Is Before Current Date"
-                } else {
-                    if (!calDate.after(tempCal)) return "Date and Time Are Before Current Date and Time"
-                }
-            }
-            if (checkedEditDaily.value == true || checkedEditWeekly.value == true || checkedEditMonthly.value == true) {
-                val tempCal2 = android.icu.util.Calendar.getInstance()
-                tempCal2.time = calStartDate.time
-                tempCal2.set(android.icu.util.Calendar.MINUTE, 0)
-                tempCal2.set(android.icu.util.Calendar.HOUR_OF_DAY, 0)
-                tempCal.set(android.icu.util.Calendar.MINUTE, 0)
-                tempCal.set(android.icu.util.Calendar.HOUR_OF_DAY, 0)
-                if (tempCal.after(calStartDate) && checkedEditRangeStart.value == true) return "Start Date Is Before Current Date"
-            }
             if (checkedEditRemind.value == true) {
                 if (textEditRemind.value!!.isBlank() || textEditRemind.value == "") return "Reminder Time Cannot Be Blank"
                 if (!textEditRemind.value!!.isDigitsOnly()) return "Reminder Time Is Not a Number"

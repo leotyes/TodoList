@@ -1,5 +1,7 @@
 package com.example.todolist
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
@@ -33,6 +35,13 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         binding.bottomNavigationView.setupWithNavController(navController)
+
+        val serviceIntent = Intent(this, LocationForegroundService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             if (destination.id == R.id.addItemFragment || destination.id == R.id.addGroupFragment) {

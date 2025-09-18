@@ -3,7 +3,9 @@ package com.example.todolist.workers
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.icu.lang.UCharacter.GraphemeClusterBreak.L
 import android.icu.util.Calendar
@@ -26,6 +28,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.example.todolist.DataStoreManager.dataStore
+import com.example.todolist.MainActivity
 import com.example.todolist.R
 import com.example.todolist.workers.DailyNotificationWorker.Companion
 import com.example.todolist.workers.SingleNotificationWorker.Companion.GROUP_NAME
@@ -57,6 +60,17 @@ class DailyNotificationWorker(private val appContext: Context, private val worke
             }
         }
         if (itemId != -1L) {
+            val intent = Intent(appContext, MainActivity::class.java).apply {
+                flags = (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+
+            val pendingIntent = PendingIntent.getActivity(
+                appContext,
+                itemId.toInt() + 6767,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
             val builder = NotificationCompat.Builder(appContext, "notification_channel")
                 .setSmallIcon(R.drawable.baseline_circle_notifications_24)
                 .setContentTitle("$itemName at $itemTime every day")
@@ -65,6 +79,7 @@ class DailyNotificationWorker(private val appContext: Context, private val worke
                     .setBigContentTitle("$itemName at $itemTime in group $groupName")
                     .bigText(itemDescription))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
             with(NotificationManagerCompat.from(appContext)) {
                 if (ActivityCompat.checkSelfPermission(
                         appContext,
@@ -108,6 +123,17 @@ class WeeklyNotificationWorker(private val appContext: Context, private val work
             }
         }
         if (itemId != -1L) {
+            val intent = Intent(appContext, MainActivity::class.java).apply {
+                flags = (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+
+            val pendingIntent = PendingIntent.getActivity(
+                appContext,
+                itemId.toInt() + 6767,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
             val builder = NotificationCompat.Builder(appContext, "notification_channel")
                 .setSmallIcon(R.drawable.baseline_circle_notifications_24)
                 .setContentTitle("$itemName at $itemTime every $itemDay")
@@ -116,6 +142,7 @@ class WeeklyNotificationWorker(private val appContext: Context, private val work
                     .setBigContentTitle("$itemName at $itemTime every $itemDay in group $groupName")
                     .bigText(itemDescription))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
             with(NotificationManagerCompat.from(appContext)) {
                 if (ActivityCompat.checkSelfPermission(
                         appContext,
@@ -157,6 +184,17 @@ class MonthlyNotificationWorker(private val appContext: Context, private val wor
             return Result.success()
         } else {
             if (itemId != -1L) {
+                val intent = Intent(appContext, MainActivity::class.java).apply {
+                    flags = (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                }
+
+                val pendingIntent = PendingIntent.getActivity(
+                    appContext,
+                    itemId.toInt() + 6767,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
                 val builder = NotificationCompat.Builder(appContext, "notification_channel")
                     .setSmallIcon(R.drawable.baseline_circle_notifications_24)
                     .setContentTitle("$itemName at $itemTime on the $itemDay of every month")
@@ -165,6 +203,7 @@ class MonthlyNotificationWorker(private val appContext: Context, private val wor
                         .setBigContentTitle("$itemName at $itemTime on the $itemDay of every month in group $groupName")
                         .bigText(itemDescription))
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setContentIntent(pendingIntent)
                 with(NotificationManagerCompat.from(appContext)) {
                     if (ActivityCompat.checkSelfPermission(
                             appContext,
@@ -237,6 +276,17 @@ class SingleNotificationWorker(private val appContext: Context, private val work
         val itemDescription = workerParams.inputData.getString(TODO_DESCRIPTION)
         val itemId = workerParams.inputData.getLong(TODO_ID, -1)
         if (itemId != -1L) {
+            val intent = Intent(appContext, MainActivity::class.java).apply {
+                flags = (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+
+            val pendingIntent = PendingIntent.getActivity(
+                appContext,
+                itemId.toInt() + 6767,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
             val builder = NotificationCompat.Builder(appContext, "notification_channel")
                 .setSmallIcon(R.drawable.baseline_circle_notifications_24)
                 .setContentTitle("$itemName at $itemTime")
@@ -245,6 +295,7 @@ class SingleNotificationWorker(private val appContext: Context, private val work
                     .setBigContentTitle("$itemName at $itemTime in group $groupName")
                     .bigText(itemDescription))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
             with(NotificationManagerCompat.from(appContext)) {
                 if (ActivityCompat.checkSelfPermission(
                         appContext,
